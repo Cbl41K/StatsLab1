@@ -55,12 +55,13 @@ def numericReview(df: pd.DataFrame) -> pd.DataFrame:
 def plot_histograms(df: pd.DataFrame) -> tuple[plt.Figure, object]:
     """Build a Seaborn histogram for each numeric dataframe column."""
     columns, figure, axes = _numeric_plot_layout(df, "Numeric column histograms")
-    for axis, column in zip(axes.flat, columns):
+    colors = sns.color_palette("husl", n_colors=len(columns))
+    for axis, column, color in zip(axes.flat, columns, colors):
         values = df[column].dropna()
         if values.empty:
             axis.text(0.5, 0.5, "No data", ha="center", va="center")
         else:
-            sns.histplot(x=values, ax=axis)
+            sns.histplot(x=values, color=color, ax=axis)
         #axis.set_title(str(column))
 
     for axis in axes.flat[len(columns) :]:
@@ -72,7 +73,8 @@ def plot_histograms(df: pd.DataFrame) -> tuple[plt.Figure, object]:
 def plot_kdes(df: pd.DataFrame) -> tuple[plt.Figure, object]:
     """Build a Seaborn KDE plot for each numeric dataframe column."""
     columns, figure, axes = _numeric_plot_layout(df, "Numeric column KDE plots")
-    for axis, column in zip(axes.flat, columns):
+    colors = sns.color_palette("husl", n_colors=len(columns))
+    for axis, column, color in zip(axes.flat, columns, colors):
         values = df[column].dropna()
         if values.nunique() < 2:
             axis.text(
@@ -83,7 +85,7 @@ def plot_kdes(df: pd.DataFrame) -> tuple[plt.Figure, object]:
                 va="center",
             )
         else:
-            sns.kdeplot(x=values, ax=axis)
+            sns.kdeplot(x=values, color=color, ax=axis)
         #axis.set_title(str(column))
 
     for axis in axes.flat[len(columns) :]:
@@ -95,12 +97,13 @@ def plot_kdes(df: pd.DataFrame) -> tuple[plt.Figure, object]:
 def plot_boxplots(df: pd.DataFrame) -> tuple[plt.Figure, object]:
     """Build a Seaborn boxplot for each numeric dataframe column."""
     columns, figure, axes = _numeric_plot_layout(df, "Numeric column boxplots")
-    for axis, column in zip(axes.flat, columns):
+    colors = sns.color_palette("husl", n_colors=len(columns))
+    for axis, column, color in zip(axes.flat, columns, colors):
         values = df[column].dropna()
         if values.empty:
             axis.text(0.5, 0.5, "No data", ha="center", va="center")
         else:
-            sns.boxplot(x=values, ax=axis)
+            sns.boxplot(x=values, color=color, ax=axis)
         #axis.set_title(str(column))
 
     for axis in axes.flat[len(columns) :]:
