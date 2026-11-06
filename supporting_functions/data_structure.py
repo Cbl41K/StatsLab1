@@ -4,6 +4,18 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
+PANEL_COLOR = "C0"
+
+
+def _finish_panels(figure, axes, columns, ylabel=None):
+    for axis, column in zip(axes.flat, columns):
+        axis.set_title(str(column))
+        if ylabel:
+            axis.set_ylabel(ylabel)
+    for axis in axes.flat[len(columns) :]:
+        axis.set_visible(False)
+    figure.tight_layout(rect=[0, 0, 1, 0.99])
+
 
 def _numeric_plot_layout(
     df: pd.DataFrame,
@@ -54,61 +66,46 @@ def numericReview(df: pd.DataFrame) -> pd.DataFrame:
 
 def plot_histograms(df: pd.DataFrame) -> tuple[plt.Figure, object]:
     """Build a Seaborn histogram for each numeric dataframe column."""
-    columns, figure, axes = _numeric_plot_layout(df, "Numeric column histograms")
-    colors = sns.color_palette("husl", n_colors=len(columns))
-    for axis, column, color in zip(axes.flat, columns, colors):
+    columns, figure, axes = _numeric_plot_layout(df, "Гистограммы числовых признаков")
+    for axis, column in zip(axes.flat, columns):
         values = df[column].dropna()
         if values.empty:
-            axis.text(0.5, 0.5, "No data", ha="center", va="center")
+            axis.text(0.5, 0.5, "нет данных", ha="center", va="center")
         else:
-            sns.histplot(x=values, color=color, ax=axis)
-        #axis.set_title(str(column))
-
-    for axis in axes.flat[len(columns) :]:
-        axis.set_visible(False)
-    figure.tight_layout(rect=[0, 0, 1, 0.99])
+            sns.histplot(x=values, color=PANEL_COLOR, ax=axis)
+    _finish_panels(figure, axes, columns, ylabel="число молекул")
     return figure, axes
 
 
 def plot_kdes(df: pd.DataFrame) -> tuple[plt.Figure, object]:
     """Build a Seaborn KDE plot for each numeric dataframe column."""
-    columns, figure, axes = _numeric_plot_layout(df, "Numeric column KDE plots")
-    colors = sns.color_palette("husl", n_colors=len(columns))
-    for axis, column, color in zip(axes.flat, columns, colors):
+    columns, figure, axes = _numeric_plot_layout(df, "Графики плотности числовых признаков")
+    for axis, column in zip(axes.flat, columns):
         values = df[column].dropna()
         if values.nunique() < 2:
             axis.text(
                 0.5,
                 0.5,
-                "KDE requires at least two distinct values",
+                "для плотности нужны хотя бы два разных значения",
                 ha="center",
                 va="center",
             )
         else:
-            sns.kdeplot(x=values, color=color, ax=axis)
-        #axis.set_title(str(column))
-
-    for axis in axes.flat[len(columns) :]:
-        axis.set_visible(False)
-    figure.tight_layout(rect=[0, 0, 1, 0.99])
+            sns.kdeplot(x=values, color=PANEL_COLOR, ax=axis)
+    _finish_panels(figure, axes, columns, ylabel="плотность")
     return figure, axes
 
 
 def plot_boxplots(df: pd.DataFrame) -> tuple[plt.Figure, object]:
     """Build a Seaborn boxplot for each numeric dataframe column."""
-    columns, figure, axes = _numeric_plot_layout(df, "Numeric column boxplots")
-    colors = sns.color_palette("husl", n_colors=len(columns))
-    for axis, column, color in zip(axes.flat, columns, colors):
+    columns, figure, axes = _numeric_plot_layout(df, "Ящики с усами числовых признаков")
+    for axis, column in zip(axes.flat, columns):
         values = df[column].dropna()
         if values.empty:
-            axis.text(0.5, 0.5, "No data", ha="center", va="center")
+            axis.text(0.5, 0.5, "нет данных", ha="center", va="center")
         else:
-            sns.boxplot(x=values, color=color, ax=axis)
-        #axis.set_title(str(column))
-
-    for axis in axes.flat[len(columns) :]:
-        axis.set_visible(False)
-    figure.tight_layout(rect=[0, 0, 1, 0.99])
+            sns.boxplot(x=values, color=PANEL_COLOR, ax=axis)
+    _finish_panels(figure, axes, columns)
     return figure, axes
 
 
@@ -134,6 +131,8 @@ def plot_corr_matrix(
         fmt=".2f",
         ax=axis,
     )
-    axis.set_title("Numeric parameter correlation matrix")
+    axis.set_title("Корреляционная матрица числовых признаков")
+    axis.set_xlabel("")
+    axis.set_ylabel("")
     figure.tight_layout(rect=[0, 0, 1, 0.98])
     return corr_matrix, figure, axis
