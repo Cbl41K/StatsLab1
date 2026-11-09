@@ -7794,7 +7794,7 @@ a.anchor-link {
   }
 </style>
 <!-- End of mermaid configuration --></head>
-<body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light"><div class="site-nav"><a href="index.html">Содержание</a><a href="data_review.html">Обзор данных</a><a href="hbond_simple.html">Акцепторы и доноры</a></div>
+<body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c2f7f10b">
 <div class="jp-Cell-inputWrapper" tabindex="0">
@@ -9911,27 +9911,114 @@ D          56.6203  5.07e-13             0.0056             да
 </main>
 
 <style>
-.site-nav {
+body { margin: 0; font-family: sans-serif; color: #222; background: #f6f6f6; }
+.topbar { padding: 1.6rem 1.8rem; background: #fff; border-bottom: 1px solid #ddd; }
+.kicker { margin: 0; font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase; color: #666; }
+.topbar h1 { margin: 0.35rem 0 0; font-size: 2rem; line-height: 1.25; }
+.layout { display: block; }
+.sidebar {
+    position: fixed;
+    top: calc(50vh - 10rem);
+    left: 1rem;
+    width: 20rem;
+    z-index: 5;
+}
+.sidebar a,
+.sidebar a:hover { color: #222; text-decoration: none; }
+.sidebar summary { display: block; list-style: none; cursor: pointer; }
+.sidebar summary::-webkit-details-marker { display: none; }
+.sidebar summary::marker { content: ""; }
+.sidebar-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    max-height: calc(100vh - 8rem);
+    overflow: auto;
+    padding: 0.7rem;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+.sidebar-box > a,
+.sidebar-box > details { background: #fff; border: 1px solid #ddd; border-radius: 6px; }
+.sidebar-box > a,
+.sidebar-box > details > summary { display: block; padding: 0.8rem 1rem; border-radius: 6px; }
+.sidebar-box > a:hover,
+.sidebar-box > details > summary:hover { background: #eee; }
+.sidebar details details { margin: 0.65rem 0.6rem; background: #fafafa; border: 1px solid #e4e4e4; border-radius: 6px; }
+.sidebar details details > summary { display: block; padding: 0; border-radius: 6px; }
+.sidebar details details > summary a { display: block; padding: 0.6rem 0.75rem; border-radius: 6px; }
+.sidebar details details > summary a:hover { background: #eee; }
+.notebook-item { position: relative; margin: 0.65rem 0.6rem; }
+.notebook-link {
+    display: block;
+    margin: 0.65rem 0.6rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid #e4e4e4;
+    border-radius: 6px;
+    background: #fafafa;
+    color: #222;
+}
+.notebook-link:hover { background: #eee; }
+.toc-pop .open-notebook { display: block; padding: 0.35rem 0.6rem; }
+.sidebar .toc { margin: 0.2rem 0 0.4rem 1rem; padding: 0; list-style: none; }
+.sidebar .empty { margin: 0.2rem 0.6rem 0.6rem; color: #777; font-size: 0.9rem; }
+.content { margin-left: 22rem; margin-right: 22rem; min-width: 0; padding: 1.5rem 1rem 3rem 1rem; }
+.panel { width: 100%; padding: 1.3rem 1.5rem; background: #fff; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+.panel h2 { margin: 0 0 0.8rem; font-size: 1.35rem; }
+.lead { margin: 0; font-size: 1.05rem; line-height: 1.55; }
+.panel table { width: 100%; border-collapse: collapse; margin-top: 0.4rem; }
+.panel th, .panel td { padding: 0.55rem 0.7rem; border: 1px solid #ddd; text-align: left; vertical-align: top; }
+.panel th { background: #f3f3f3; }
+.panel td:first-child { font-family: monospace; white-space: nowrap; }
+.code-fold { margin: 0.4rem 0 0.8rem; }
+.code-fold > summary { cursor: pointer; }
+.sidebar {
     font-family: sans-serif;
-    padding: 0.6rem 1rem;
-    background: #f4f4f4;
-    border-bottom: 1px solid #ddd;
+    font-size: 16px;
+    font-weight: normal;
+    line-height: 1.4;
 }
-.site-nav a {
-    margin-right: 1rem;
+.sidebar * {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    letter-spacing: normal;
+    box-sizing: border-box;
 }
-.code-fold {
-    margin: 0.4rem 0 0.8rem;
-}
-.code-fold > summary {
-    cursor: pointer;
+.sidebar a:link,
+.sidebar a:visited,
+.sidebar a:hover {
+    color: #222;
+    text-decoration: none;
 }
 </style>
+<script>window.PAGE_CHROME = {"kicker": "Лабораторная работа 01", "title": "Инфохимия. Статистический анализ свойств молекул", "sidebar": "<div class=\"sidebar-box\">\n<a href=\"index.html\">О работе</a>\n<details><summary>Данные</summary>\n<details><summary><a href=\"features.html\">Описание признаков</a></summary></details>\n</details>\n<details><summary>Спринт 1</summary>\n<a class=\"notebook-link\" href=\"data_review.html\">Обзор данных</a>\n<a class=\"notebook-link\" href=\"hbond_simple.html\">Акцепторы и доноры</a>\n</details>\n<details><summary>Спринт 2</summary>\n<p class=\"empty\">Ноутбуков пока нет</p>\n</details>\n</details>\n<details><summary>Материалы</summary>\n<details><summary><a href=\"materials.html\">Источники</a></summary></details>\n</details>\n</div>"};</script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    var areas = document.querySelectorAll(
-        ".jp-CodeCell .jp-InputArea, .code_cell .input_area"
-    );
+    var page = window.PAGE_CHROME;
+    var bar = document.createElement("div");
+    var layout = document.createElement("div");
+    var aside = document.createElement("aside");
+    var content = document.createElement("div");
+    bar.className = "topbar";
+    bar.innerHTML = "<p class=\"kicker\"></p><h1></h1>";
+    bar.querySelector(".kicker").textContent = page.kicker;
+    bar.querySelector("h1").textContent = page.title;
+    layout.className = "layout";
+    aside.className = "sidebar";
+    aside.innerHTML = page.sidebar;
+    content.className = "content";
+    while (document.body.firstChild) {
+        content.appendChild(document.body.firstChild);
+    }
+    layout.appendChild(aside);
+    layout.appendChild(content);
+    document.body.appendChild(bar);
+    document.body.appendChild(layout);
+
+    var areas = document.querySelectorAll(".jp-CodeCell .jp-InputArea, .code_cell .input_area");
     areas.forEach(function (area) {
         var details = document.createElement("details");
         var summary = document.createElement("summary");
@@ -9941,6 +10028,31 @@ document.addEventListener("DOMContentLoaded", function () {
         details.appendChild(summary);
         details.appendChild(area);
     });
+
+    document.querySelectorAll(".notebook-item").forEach(function (item) {
+        item.querySelector(".notebook-link").addEventListener("click", function () {
+            var wasOpen = item.classList.contains("open");
+            document.querySelectorAll(".notebook-item.open").forEach(function (other) {
+                other.classList.remove("open");
+            });
+            if (!wasOpen) {
+                item.classList.add("open");
+            }
+        });
+        item.addEventListener("mouseleave", function () {
+            item.classList.remove("open");
+        });
+    });
+
+    var sidebar = document.querySelector(".sidebar");
+    var baseTop = sidebar.getBoundingClientRect().top;
+    function placeSidebar() {
+        var limit = document.querySelector(".topbar").offsetHeight;
+        var shift = Math.min(window.scrollY, limit);
+        sidebar.style.top = (baseTop - shift) + "px";
+    }
+    window.addEventListener("scroll", placeSidebar);
+    placeSidebar();
 });
 </script>
 </body>
