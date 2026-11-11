@@ -9,37 +9,182 @@ ROOT = Path(__file__).resolve().parent.parent
 OUTPUT_DIR = ROOT / "docs"
 FEATURES_PATH = ROOT / "content" / "opisanie-priznakov.html"
 
+DATA_NOTEBOOKS = [
+    ("notebooks/data_review.ipynb", "Обзор данных", "data_review.html"),
+]
+
+AUTHORS = {
+    "features.html": "Сычев Александр | 467653",
+    "data_review.html": "Сычев Александр | 467653",
+    "hbond_simple.html": "Петрунина Анна | 327017",
+}
+
 SPRINTS = [
     (
         "Спринт 1",
         [
-            ("notebooks/data_review.ipynb", "Обзор данных", "data_review.html"),
             ("notebooks/hbond_simple.ipynb", "Акцепторы и доноры", "hbond_simple.html"),
         ],
     ),
     ("Спринт 2", []),
 ]
 
+INDEX_SECTIONS = [
+    {"title": "Введение", "href": "#vvedenie"},
+    {"title": "Порядок просмотра", "href": "#poryadok"},
+    {"title": "Команда", "href": "#komanda"},
+]
+
+GUIDE = """
+<p class="lead">Меню слева разложено по разделам работы. Сам материал читается от обзора данных: это общий ствол. От него в сторону отходит описание признаков — словарь, если в таблице встретилось непонятное имя столбца. Две основные ветки от того же обзора — два спринта. Эта страница стоит перед схемой, источники — после неё.</p>
+<div class="tree">
+<div class="scheme-card tree-root"><span>Ствол</span><strong>Обзор данных</strong><span class="note">весь набор и план, откуда расходятся ветки</span></div>
+<div class="tree-side"><div class="scheme-card"><span>Побочная ветка</span><strong>Описание признаков</strong><span class="note">словарь столбцов, открывать по ходу обзора</span></div></div>
+<div class="tree-fork">
+<div class="scheme-card"><span>Спринт 1</span><strong>Акцепторы и доноры</strong><span class="note">разбор первой пары величин</span></div>
+<div class="scheme-card"><span>Спринт 2</span><strong>Генератор</strong><span class="note">ноутбука пока нет</span></div>
+</div>
+</div>
+<ol class="route">
+<li><div>
+<h3>Обзор данных</h3>
+<p>Общий ствол. Здесь все величины сразу: цели обзора, какие колонки экспериментальные, а какие посчитаны, очистка, распределения, выбросы и связи между величинами. В конце собран план дальнейших разборов и переход к генератору. Графики в середине можно листать быстрее. Итоги в конце лучше дочитать: без них обе ветки спринта начинаются без причины.</p>
+</div></li>
+<li><div>
+<h3>Описание признаков</h3>
+<p>Побочная ветка, не отдельный этап. Короткая таблица: имя столбца и обычными словами, что это за величина. В обзоре те же имена встречаются как <span class="code">cal_logp</span>, <span class="code">cal_pka_basic</span>, <span class="code">cal_h_bond_acceptor_count</span>. Страницу открывают рядом с обзором, когда имя в таблице мешает читать, и держат её под рукой.</p>
+</div></li>
+<li><div>
+<h3>Спринт 1. Акцепторы и доноры</h3>
+<p>Первая основная ветка. Сейчас в ней один ноутбук. В нём две величины вместе: сколько мест в молекуле может принять водородную связь и сколько отдать. Ноутбук показывает, как они распределены, насколько связаны и что делать с редкими очень большими значениями. Сюда заходят после обзора: там видно, какое место эта пара занимает среди остальных признаков.</p>
+</div></li>
+<li><div>
+<h3>Спринт 2. Генератор</h3>
+<p>Вторая основная ветка. По заданию из одной выбранной величины собирают генератор случайных чисел и сравнивают его с исходными данными. Пункт в меню уже есть, ноутбука в нём пока нет. Когда он появится, читается после обзора, рядом со спринтом 1, а не вместо него.</p>
+</div></li>
+<li><div>
+<h3>Источники</h3>
+<p>«Материалы» — статьи и описания данных, на которые опирается работа. Список ещё пустой. Страница нужна, когда надо проверить, откуда взяты база, критерии и формулировки.</p>
+</div></li>
+</ol>
+"""
+
 KICKER = "Лабораторная работа 01"
 TITLE = "Инфохимия. Статистический анализ свойств молекул"
-INTRO = (
-    "В работе по данным DrugBank разбирается, как устроены физико-химические "
-    "свойства лекарственных молекул и какие из этих свойств можно считать "
-    "случайными величинами. В наборе есть расчётные характеристики: размер "
-    "молекулы, растворимость, способность образовывать водородные связи, "
-    "кислотность и признаки того, насколько вещество похоже на лекарство. "
-    "На первом спринте по этим данным смотрят распределения, связи между "
-    "величинами и проверяют гипотезы. На втором из одной выбранной величины "
-    "собирают генератор случайных чисел и сравнивают его с исходными данными. "
-    "Слева собраны обзор всего набора, разбор акцепторов и доноров, описание "
-    "столбцов и место для источников."
+INTRO = """
+<p>В DrugBank собраны лекарственные вещества и их свойства. Для этой работы из базы взяты уже посчитанные характеристики молекул: размер, растворимость, способность отдавать и принимать водородную связь, кислотность и несколько признаков того, насколько вещество похоже на лекарство. Каждая характеристика встречается у тысяч молекул, поэтому её смотрят как случайную величину. У неё есть центр, разброс, редкие значения и соседи, вместе с которыми она меняется.</p>
+<p>Работа делится на два спринта. В первом нужно понять набор целиком и проверить, как связаны отдельные величины. Во втором из одной выбранной величины собирают генератор случайных чисел и сравнивают его с исходными данными. Сейчас на сайте готовы обзор всего набора и первый подробный разбор: акцепторы и доноры водородной связи. Генератор появится в спринте 2.</p>
+<p>Здесь нет расчётов. Страница объясняет, зачем остальные вкладки и в каком порядке их открывать. В ноутбуках расчёт спрятан под пункт «Код»: для чтения достаточно текста, графиков и выводов. Слева меню по всей работе. Справа заголовки той страницы, которая открыта. На страницах со словарём и источниками правого списка нет: там один блок, и оглавление было бы лишним.</p>
+"""
+
+CHEMIST = (
+    "Исследует свойства молекул и разрабатывает свою часть статистического анализа: "
+    "смотрит, как устроены величины, как они связаны, и проверяет гипотезы."
 )
+
+TEAM = """
+<table class="team">
+<thead><tr><th>Инфохимики</th><th>Дизайнер</th></tr></thead>
+<tbody>
+<tr>
+<td>
+<p class="who">Сычев Александр<span class="isu">467653</span><span class="roles">тимлид | разработчик | исследователь</span></p>
+<p class="files">Обзор данных, Описание признаков</p>
+<p class="role">Руководил командой: составил план выполнения работы, подобрал начальные данные, с которыми шла дальнейшая работа, и отдал остальным сокомандникам индивидуальные задания. {chemist}</p>
+</td>
+<td rowspan="4">
+<p class="who">Закликовский Иван<span class="isu">503803</span><span class="roles">дизайнер | (возможно разработчик и исследователь)</span></p>
+<p class="files">&lt;пока нет&gt;</p>
+<p class="role">Собрал и оформил этот сайт, оформил ноутбуки команды и переформулировал тексты. Возможно, тоже участвует в исследовании.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p class="who">Петрунина Анна<span class="isu">327017</span><span class="roles">разработчик | исследователь</span></p>
+<p class="files">Акцепторы и доноры</p>
+<p class="role">{chemist}</p>
+</td>
+</tr>
+<tr>
+<td>
+<p class="who">Родичева Варвара<span class="isu">502343</span><span class="roles">разработчик | исследователь</span></p>
+<p class="files">&lt;пока нет&gt;</p>
+<p class="role">{chemist}</p>
+</td>
+</tr>
+<tr>
+<td>
+<p class="who">Авсиевич Евдокия<span class="isu">464929</span><span class="roles">разработчик | исследователь</span></p>
+<p class="files">&lt;пока нет&gt;</p>
+<p class="role">{chemist}</p>
+</td>
+</tr>
+</tbody>
+</table>
+""".format(chemist=CHEMIST)
 
 PAGE_STYLE = """
 <style>
-body { margin: 0; font-family: sans-serif; color: #222; background: #f6f6f6; }
-.topbar { padding: 1.6rem 1.8rem; background: #fff; border-bottom: 1px solid #ddd; }
-.kicker { margin: 0; font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase; color: #666; }
+:root {
+    color-scheme: light;
+    --bg: #f6f6f6;
+    --surface: #fff;
+    --surface-2: #fafafa;
+    --text: #222;
+    --muted: #666;
+    --muted-2: #777;
+    --line: #ddd;
+    --line-soft: #eee;
+    --line-faint: #e4e4e4;
+    --hover: #eee;
+    --current: #ddd;
+    --table-head: #f3f3f3;
+    --scheme-line: #146c34;
+    --scheme-dash: #146c34;
+    --heading: #146c34;
+    --accent-bg: #e7f5ec;
+}
+html[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #171717;
+    --surface: #242424;
+    --surface-2: #2e2e2e;
+    --text: #eee;
+    --muted: #aaa;
+    --muted-2: #999;
+    --line: #3f3f3f;
+    --line-soft: #333;
+    --line-faint: #3a3a3a;
+    --hover: #353535;
+    --current: #454545;
+    --table-head: #303030;
+    --scheme-line: #5ca67c;
+    --scheme-dash: #5ca67c;
+    --heading: #5ca67c;
+    --accent-bg: #243028;
+    --jp-layout-color0: #242424;
+    --jp-layout-color1: #242424;
+    --jp-layout-color2: #2e2e2e;
+    --jp-layout-color3: #3f3f3f;
+    --jp-ui-font-color0: rgba(255, 255, 255, 0.9);
+    --jp-ui-font-color1: rgba(255, 255, 255, 0.87);
+    --jp-ui-font-color2: rgba(255, 255, 255, 0.7);
+    --jp-ui-font-color3: rgba(255, 255, 255, 0.5);
+    --jp-content-font-color0: rgba(255, 255, 255, 0.9);
+    --jp-content-font-color1: rgba(255, 255, 255, 0.87);
+    --jp-content-font-color2: rgba(255, 255, 255, 0.7);
+    --jp-content-font-color3: rgba(255, 255, 255, 0.5);
+    --jp-content-link-color: #9ec1ff;
+    --jp-border-color0: #3f3f3f;
+    --jp-border-color1: #4a4a4a;
+    --jp-border-color2: #555;
+    --jp-cell-editor-background: #1e1e1e;
+    --jp-rendermime-table-row-background: transparent;
+    --jp-rendermime-table-row-hover-background: #303030;
+}
+body { margin: 0; font-family: sans-serif; color: var(--text); background: var(--bg); }
+.topbar { padding: 1.6rem 1.8rem; background: var(--surface); border-bottom: 1px solid var(--line); }
+.kicker { margin: 0; font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
 .topbar h1 { margin: 0.35rem 0 0; font-size: 2rem; line-height: 1.25; }
 .layout { display: block; }
 .sidebar {
@@ -50,7 +195,7 @@ body { margin: 0; font-family: sans-serif; color: #222; background: #f6f6f6; }
     z-index: 5;
 }
 .sidebar a,
-.sidebar a:hover { color: #222; text-decoration: none; }
+.sidebar a:hover { color: var(--text); text-decoration: none; }
 .sidebar summary { display: block; list-style: none; cursor: pointer; }
 .sidebar summary::-webkit-details-marker { display: none; }
 .sidebar summary::marker { content: ""; }
@@ -60,42 +205,121 @@ body { margin: 0; font-family: sans-serif; color: #222; background: #f6f6f6; }
     gap: 0.7rem;
     max-height: calc(100vh - 8rem);
     overflow: auto;
+    overscroll-behavior: contain;
     padding: 0.7rem;
-    background: #fff;
-    border: 1px solid #ddd;
+    background: var(--surface);
+    border: 1px solid var(--line);
     border-radius: 8px;
 }
 .sidebar-box > a,
-.sidebar-box > details { background: #fff; border: 1px solid #ddd; border-radius: 6px; }
+.sidebar-box > details { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
 .sidebar-box > a,
 .sidebar-box > details > summary { display: block; padding: 0.8rem 1rem; border-radius: 6px; }
 .sidebar-box > a:hover,
-.sidebar-box > details > summary:hover { background: #eee; }
-.sidebar details details { margin: 0.65rem 0.6rem; background: #fafafa; border: 1px solid #e4e4e4; border-radius: 6px; }
+.sidebar-box > details > summary:hover { background: var(--hover); }
+.sidebar details details { margin: 0.65rem 0.6rem; background: var(--surface-2); border: 1px solid var(--line-faint); border-radius: 6px; }
 .sidebar details details > summary { display: block; padding: 0; border-radius: 6px; }
 .sidebar details details > summary a { display: block; padding: 0.6rem 0.75rem; border-radius: 6px; }
-.sidebar details details > summary a:hover { background: #eee; }
+.sidebar details details > summary a:hover { background: var(--hover); }
 .notebook-item { position: relative; margin: 0.65rem 0.6rem; }
 .notebook-link {
     display: block;
     margin: 0.65rem 0.6rem;
     padding: 0.6rem 0.75rem;
-    border: 1px solid #e4e4e4;
+    border: 1px solid var(--line-faint);
     border-radius: 6px;
-    background: #fafafa;
-    color: #222;
+    background: var(--surface-2);
+    color: var(--text);
 }
-.notebook-link:hover { background: #eee; }
+.notebook-link:hover { background: var(--hover); }
 .toc-pop .open-notebook { display: block; padding: 0.35rem 0.6rem; }
 .sidebar .toc { margin: 0.2rem 0 0.4rem 1rem; padding: 0; list-style: none; }
-.sidebar .empty { margin: 0.2rem 0.6rem 0.6rem; color: #777; font-size: 0.9rem; }
+.sidebar .empty { margin: 0.2rem 0.6rem 0.6rem; color: var(--muted-2); font-size: 0.9rem; }
+.page-toc { left: auto; right: 1rem; }
+.page-toc .sidebar-box { gap: 0.4rem; padding: 0.45rem; overscroll-behavior: contain; }
+.page-toc .sidebar-box > a { display: block; padding: 0.45rem 0.7rem; border-radius: 6px; font-size: 0.92rem; line-height: 1.3; }
+.page-toc .sidebar-box > a:hover { background: var(--hover); }
+.page-toc .sidebar-box > a.is-current,
+.page-toc .sidebar-box > a.is-current:hover { background: var(--current); }
+.prose p { margin: 0 0 0.85rem; font-size: 1.05rem; line-height: 1.6; }
+.prose p:last-child { margin-bottom: 0; }
+.tree { display: flex; flex-direction: column; align-items: center; margin: 2.6rem 0 2.4rem; }
+.scheme-card { display: flex; flex-direction: column; align-items: flex-start; gap: 0.28rem; width: 100%; min-height: 14rem; padding: 0.85rem 0.95rem; background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; box-sizing: border-box; }
+.scheme-card span { color: var(--muted); font-size: 0.86rem; }
+.scheme-card strong { font-size: 1rem; line-height: 1.3; }
+.scheme-card .note { line-height: 1.35; }
+.tree-root { position: relative; width: min(100%, 24rem); z-index: 1; }
+.tree-root::after { content: ""; position: absolute; left: 50%; top: 100%; height: 1.4rem; border-left: 1px solid var(--scheme-line); }
+.tree-side { position: relative; width: 100%; margin-top: 1.4rem; padding-left: calc(50% + 1.35rem); box-sizing: border-box; }
+.tree-side::before { content: ""; position: absolute; left: 50%; top: 0; height: calc(100% + 8rem + 1.7rem); border-left: 1px solid var(--scheme-line); }
+.tree-side .scheme-card { position: relative; z-index: 1; width: 100%; max-width: 20rem; }
+.tree-side .scheme-card::before { content: ""; position: absolute; right: 100%; top: 50%; width: 1.35rem; border-top: 1px dashed var(--scheme-dash); }
+.tree-fork { display: flex; justify-content: center; align-items: stretch; gap: 3.2rem; width: 100%; margin-top: 8rem; }
+.tree-fork .scheme-card { position: relative; z-index: 1; width: min(17.5rem, calc(50% - 1.6rem)); }
+.tree-fork .scheme-card:first-child::after { content: ""; position: absolute; left: 100%; top: 1.7rem; width: 1.6rem; border-top: 1px solid var(--scheme-line); }
+.tree-fork .scheme-card:last-child::before { content: ""; position: absolute; right: 100%; top: 1.7rem; width: 1.6rem; border-top: 1px solid var(--scheme-line); }
+.route { list-style: none; margin: 0; padding: 0; counter-reset: stop; }
+.route > li { display: grid; grid-template-columns: 2.3rem 1fr; gap: 0.75rem; padding: 0.95rem 0; border-top: 1px solid var(--line-soft); }
+.route > li::before { counter-increment: stop; content: counter(stop); width: 2.3rem; height: 2.3rem; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); font-weight: 600; }
+.route h3 { margin: 0.15rem 0 0.35rem; font-size: 1.05rem; }
+.route p { margin: 0; line-height: 1.55; }
+.code { font-family: monospace; font-size: 0.92em; }
 .content { margin-left: 22rem; margin-right: 22rem; min-width: 0; padding: 1.5rem 1rem 3rem 1rem; }
-.panel { width: 100%; padding: 1.3rem 1.5rem; background: #fff; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+.panel { width: 100%; padding: 1.3rem 1.5rem; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; box-sizing: border-box; }
+.panel + .panel { margin-top: 1rem; }
 .panel h2 { margin: 0 0 0.8rem; font-size: 1.35rem; }
+.panel table.team { margin-top: 0; }
+.panel table.team td:first-child { font-family: sans-serif; white-space: normal; }
+.team .who { margin: 0; font-weight: 600; }
+.team .isu { margin-left: 0.4rem; color: var(--muted-2); font-weight: 400; font-size: 0.86rem; }
+.team .roles { margin-left: 0.55rem; font-weight: 400; }
+h1, h2, h3, h4, h5, h6,
+.jp-RenderedHTMLCommon h1,
+.jp-RenderedHTMLCommon h2,
+.jp-RenderedHTMLCommon h3,
+.jp-RenderedHTMLCommon h4,
+.jp-RenderedHTMLCommon h5,
+.jp-RenderedHTMLCommon h6 { color: var(--heading); }
+.scheme-card { border-color: var(--heading); }
+.route > li::before { color: var(--heading); border-color: var(--heading); }
+.team th,
+.team .roles { color: var(--heading); }
+.sidebar:not(.page-toc) .sidebar-box > a:hover,
+.sidebar:not(.page-toc) .notebook-link:hover,
+.sidebar:not(.page-toc) details details > summary a:hover {
+    color: var(--heading);
+    border-color: var(--heading);
+    background: var(--accent-bg);
+}
+.sidebar:not(.page-toc) .sidebar-box > details:hover { border-color: var(--heading); }
+.sidebar:not(.page-toc) .sidebar-box > details > summary:hover {
+    color: var(--heading);
+    background: var(--accent-bg);
+}
+.page-toc .sidebar-box > a.is-current,
+.page-toc .sidebar-box > a.is-current:hover,
+.sidebar:not(.page-toc) .sidebar-box > a.is-current,
+.sidebar:not(.page-toc) .sidebar-box > a.is-current:hover,
+.sidebar:not(.page-toc) .notebook-link.is-current,
+.sidebar:not(.page-toc) .notebook-link.is-current:hover {
+    color: var(--heading);
+    border-color: var(--heading);
+    background: var(--accent-bg);
+}
+.sidebar:not(.page-toc) details details:has(a.is-current) {
+    border-color: var(--heading);
+    background: var(--accent-bg);
+}
+.sidebar:not(.page-toc) details details:has(a.is-current) > summary a {
+    color: var(--heading);
+    background: transparent;
+}
+.team .files { margin: 0.35rem 0 0; color: var(--muted-2); font-size: 0.86rem; }
+.team .role { margin: 0.55rem 0 0; line-height: 1.5; }
 .lead { margin: 0; font-size: 1.05rem; line-height: 1.55; }
 .panel table { width: 100%; border-collapse: collapse; margin-top: 0.4rem; }
-.panel th, .panel td { padding: 0.55rem 0.7rem; border: 1px solid #ddd; text-align: left; vertical-align: top; }
-.panel th { background: #f3f3f3; }
+.panel th, .panel td { padding: 0.55rem 0.7rem; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+.panel th { background: var(--table-head); }
 .panel td:first-child { font-family: monospace; white-space: nowrap; }
 .code-fold { margin: 0.4rem 0 0.8rem; }
 .code-fold > summary { cursor: pointer; }
@@ -116,8 +340,62 @@ body { margin: 0; font-family: sans-serif; color: #222; background: #f6f6f6; }
 .sidebar a:link,
 .sidebar a:visited,
 .sidebar a:hover {
-    color: #222;
+    color: var(--text);
     text-decoration: none;
+}
+.sidebar .byline {
+    display: block;
+    margin-top: 0.18rem;
+    color: var(--muted-2);
+    font-size: 0.78rem;
+    font-weight: 400;
+    line-height: 1.3;
+}
+body.jp-Notebook { background: var(--bg); color: var(--text); }
+body.jp-Notebook main {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 1.3rem 1.5rem 1.8rem;
+    box-sizing: border-box;
+}
+body.jp-Notebook .jp-Cell,
+body.jp-Notebook .jp-Cell-inputWrapper,
+body.jp-Notebook .jp-InputArea,
+body.jp-Notebook .jp-RenderedHTMLCommon,
+body.jp-Notebook .jp-OutputArea,
+body.jp-Notebook .jp-OutputArea-output {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+body.jp-Notebook .jp-Collapser { display: none; }
+body.jp-Notebook .jp-Cell-inputWrapper { padding: 0; }
+.theme-toggle {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 30;
+    width: 3.5rem;
+    height: 3.5rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+}
+.theme-toggle svg { width: 1.6rem; height: 1.6rem; display: block; }
+html[data-theme="dark"] .dataframe,
+html[data-theme="dark"] .dataframe th,
+html[data-theme="dark"] .dataframe td {
+    color: var(--text);
+    background: transparent;
+    border-color: var(--line);
 }
 </style>
 """
@@ -137,6 +415,11 @@ document.addEventListener("DOMContentLoaded", function () {
     layout.className = "layout";
     aside.className = "sidebar";
     aside.innerHTML = page.sidebar;
+    var pageName = (location.pathname.split("/").pop() || "index.html").split("?")[0];
+    aside.querySelectorAll("a").forEach(function (link) {
+        var href = (link.getAttribute("href") || "").split("#")[0].split("?")[0];
+        if (href.split("/").pop() === pageName) link.classList.add("is-current");
+    });
     content.className = "content";
     while (document.body.firstChild) {
         content.appendChild(document.body.firstChild);
@@ -157,30 +440,109 @@ document.addEventListener("DOMContentLoaded", function () {
         details.appendChild(area);
     });
 
-    document.querySelectorAll(".notebook-item").forEach(function (item) {
-        item.querySelector(".notebook-link").addEventListener("click", function () {
-            var wasOpen = item.classList.contains("open");
-            document.querySelectorAll(".notebook-item.open").forEach(function (other) {
-                other.classList.remove("open");
-            });
-            if (!wasOpen) {
-                item.classList.add("open");
-            }
+    if (page.sections && page.sections.length) {
+        var right = document.createElement("aside");
+        var box = document.createElement("div");
+        right.className = "sidebar page-toc";
+        box.className = "sidebar-box";
+        page.sections.forEach(function (section) {
+            var link = document.createElement("a");
+            link.href = section.href;
+            link.textContent = section.title;
+            box.appendChild(link);
         });
-        item.addEventListener("mouseleave", function () {
-            item.classList.remove("open");
-        });
-    });
+        right.appendChild(box);
+        document.body.appendChild(right);
+    }
 
-    var sidebar = document.querySelector(".sidebar");
-    var baseTop = sidebar.getBoundingClientRect().top;
+    var sidebars = document.querySelectorAll(".sidebar");
+    var tocBox = document.querySelector(".page-toc .sidebar-box");
+    var tocLinks = tocBox ? tocBox.querySelectorAll("a") : [];
+    var headings = [];
+    tocLinks.forEach(function (link) {
+        var id = (link.getAttribute("href") || "").replace(/^#/, "");
+        var heading = id ? document.getElementById(id) : null;
+        if (heading) headings.push({ link: link, heading: heading });
+    });
+    var current = null;
+
+    function restingTop() {
+        var probe = sidebars[0];
+        var previous = probe.style.top;
+        probe.style.top = "";
+        var top = probe.getBoundingClientRect().top;
+        probe.style.top = previous;
+        return top;
+    }
+
+    function markCurrent() {
+        if (!headings.length || !tocBox) return;
+        var line = document.querySelector(".topbar").offsetHeight + 48;
+        var active = headings[0];
+        var atBottom = window.scrollY > 0 && window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 8;
+        if (atBottom) {
+            active = headings[headings.length - 1];
+        } else {
+            headings.forEach(function (item) {
+                if (item.heading.getBoundingClientRect().top <= line) active = item;
+            });
+        }
+        if (active !== current) {
+            if (current) current.link.classList.remove("is-current");
+            active.link.classList.add("is-current");
+            current = active;
+            var boxRect = tocBox.getBoundingClientRect();
+            var linkRect = active.link.getBoundingClientRect();
+            var delta = (linkRect.top + linkRect.height / 2) - (boxRect.top + boxRect.height / 2);
+            tocBox.scrollTop += delta;
+        }
+    }
+
     function placeSidebar() {
         var limit = document.querySelector(".topbar").offsetHeight;
-        var shift = Math.min(window.scrollY, limit);
-        sidebar.style.top = (baseTop - shift) + "px";
+        var rest = restingTop();
+        var top = rest - Math.min(window.scrollY, limit);
+        sidebars.forEach(function (sidebar) {
+            sidebar.style.top = top + "px";
+        });
+        var room = window.innerHeight - 2 * rest + 128;
+        var maxFit = window.innerHeight - (rest - limit) - 16;
+        var maxHeight = Math.max(160, Math.min(room, maxFit)) + "px";
+        document.querySelectorAll(".sidebar-box").forEach(function (box) {
+            box.style.maxHeight = maxHeight;
+        });
+        markCurrent();
     }
     window.addEventListener("scroll", placeSidebar);
+    window.addEventListener("resize", placeSidebar);
     placeSidebar();
+
+    var sun = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="M12 2v2.2M12 19.8V22M2 12h2.2M19.8 12H22M4.8 4.8l1.6 1.6M17.6 17.6l1.6 1.6M19.2 4.8l-1.6 1.6M6.4 17.6l-1.6 1.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>';
+    var moon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path></svg>';
+    var toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "theme-toggle";
+    function paintTheme() {
+        var dark = document.documentElement.getAttribute("data-theme") === "dark";
+        toggle.innerHTML = dark ? sun : moon;
+        toggle.setAttribute("aria-label", dark ? "Светлая тема" : "Тёмная тема");
+        if (document.body.classList.contains("jp-Notebook")) {
+            document.body.setAttribute("data-jp-theme-light", dark ? "false" : "true");
+        }
+    }
+    toggle.addEventListener("click", function () {
+        var dark = document.documentElement.getAttribute("data-theme") === "dark";
+        if (dark) {
+            document.documentElement.removeAttribute("data-theme");
+            localStorage.setItem("theme", "light");
+        } else {
+            document.documentElement.setAttribute("data-theme", "dark");
+            localStorage.setItem("theme", "dark");
+        }
+        paintTheme();
+    });
+    document.body.appendChild(toggle);
+    paintTheme();
 });
 </script>
 """
@@ -228,26 +590,36 @@ def toc_html(items, page_name):
     return "\n".join(lines)
 
 
+def file_link(href, title, link_class=""):
+    author = AUTHORS.get(href, "")
+    byline = '<span class="byline">{author}</span>'.format(author=author) if author else ""
+    class_attr = ' class="{}"'.format(link_class) if link_class else ""
+    return '<a{class_attr} href="{href}">{title}{byline}</a>'.format(
+        class_attr=class_attr,
+        href=href,
+        title=title,
+        byline=byline,
+    )
+
+
 def sidebar_html():
     parts = ['<a href="index.html">О работе</a>']
     parts.append("<details><summary>Данные</summary>")
+    for _source, title, file_name in DATA_NOTEBOOKS:
+        parts.append(file_link(file_name, title, "notebook-link"))
     parts.append(
-        '<details><summary><a href="features.html">Описание признаков</a></summary></details>'
+        "<details><summary>{link}</summary></details>".format(
+            link=file_link("features.html", "Описание признаков")
+        )
     )
     parts.append("</details>")
     for sprint_name, notebooks in SPRINTS:
         parts.append("<details><summary>{name}</summary>".format(name=sprint_name))
         if not notebooks:
             parts.append('<p class="empty">Ноутбуков пока нет</p>')
-        for source, title, file_name in notebooks:
-            parts.append(
-                '<a class="notebook-link" href="{file}">{title}</a>'.format(
-                    file=file_name,
-                    title=title,
-                )
-            )
+        for _source, title, file_name in notebooks:
+            parts.append(file_link(file_name, title, "notebook-link"))
         parts.append("</details>")
-    parts.append("</details>")
     parts.append("<details><summary>Материалы</summary>")
     parts.append(
         '<details><summary><a href="materials.html">Источники</a></summary></details>'
@@ -256,15 +628,29 @@ def sidebar_html():
     return '<div class="sidebar-box">\n' + "\n".join(parts) + "\n</div>"
 
 
-def chrome(html):
+def chrome(html, sections):
     payload = json.dumps(
-        {"kicker": KICKER, "title": TITLE, "sidebar": sidebar_html()},
+        {
+            "kicker": KICKER,
+            "title": TITLE,
+            "sidebar": sidebar_html(),
+            "sections": sections,
+        },
         ensure_ascii=False,
     )
     extra = PAGE_STYLE + "<script>window.PAGE_CHROME = " + payload + ";</script>" + PAGE_SCRIPT
+    boot = (
+        "<script>(function(){try{if(localStorage.getItem('theme')!=='light')"
+        "document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>"
+    )
+    head = html.lower().find("<head")
+    if head != -1:
+        close = html.find(">", head)
+        if close != -1:
+            html = html[: close + 1] + boot + html[close + 1 :]
     if "</body>" in html:
         return html.replace("</body>", extra + "</body>", 1)
-    return html + extra
+    return boot + html + extra
 
 
 def notebook_to_html(notebook_path):
@@ -277,7 +663,7 @@ def notebook_to_html(notebook_path):
     return html
 
 
-def write_simple_page(file_name, body):
+def write_simple_page(file_name, body, sections):
     page = Template(
         """<!DOCTYPE html>
 <html lang="ru">
@@ -291,24 +677,46 @@ $body
 </html>
 """
     ).substitute(title=TITLE, body=body)
-    (OUTPUT_DIR / file_name).write_text(chrome(page), encoding="utf-8")
+    (OUTPUT_DIR / file_name).write_text(chrome(page, sections), encoding="utf-8")
+
+
+def page_sections(notebook_path):
+    sections = []
+    for _level, title, anchor in notebook_toc(notebook_path):
+        sections.append({"title": title, "href": "#" + anchor})
+    return sections
 
 
 def write_notebook_pages():
+    groups = [DATA_NOTEBOOKS]
     for _sprint_name, notebooks in SPRINTS:
+        groups.append(notebooks)
+    for notebooks in groups:
         for source, _title, file_name in notebooks:
-            html = notebook_to_html(ROOT / source)
-            (OUTPUT_DIR / file_name).write_text(chrome(html), encoding="utf-8")
+            path = ROOT / source
+            html = notebook_to_html(path)
+            (OUTPUT_DIR / file_name).write_text(
+                chrome(html, page_sections(path)),
+                encoding="utf-8",
+            )
 
 
 def write_index():
     body = (
-        '<section class="panel">'
-        "<h2>О работе</h2>"
-        '<p class="lead">{intro}</p>'
+        '<section class="panel" id="vvedenie">'
+        "<h2>Введение</h2>"
+        '<div class="prose">{intro}</div>'
         "</section>"
-    ).format(intro=INTRO)
-    write_simple_page("index.html", body)
+        '<section class="panel" id="poryadok">'
+        "<h2>Порядок просмотра</h2>"
+        "{guide}"
+        "</section>"
+        '<section class="panel" id="komanda">'
+        "<h2>Команда</h2>"
+        + TEAM
+        + "</section>"
+    ).format(intro=INTRO, guide=GUIDE)
+    write_simple_page("index.html", body, INDEX_SECTIONS)
 
 
 def write_features():
@@ -319,17 +727,17 @@ def write_features():
         "{table}"
         "</section>"
     ).format(table=table)
-    write_simple_page("features.html", body)
+    write_simple_page("features.html", body, [])
 
 
 def write_materials():
     body = (
         '<section class="panel">'
         "<h2>Источники</h2>"
-        "<p>Пока пусто</p>"
+        "<p>Список литературы появится здесь, когда его соберут.</p>"
         "</section>"
     )
-    write_simple_page("materials.html", body)
+    write_simple_page("materials.html", body, [])
 
 
 def main():
