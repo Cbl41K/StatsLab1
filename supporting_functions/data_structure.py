@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-PANEL_COLOR = "C0"
-
 
 def _finish_panels(figure, axes, columns, ylabel=None):
     for axis, column in zip(axes.flat, columns):
@@ -25,7 +23,7 @@ def _numeric_plot_layout(
     if len(columns) == 0:
         raise ValueError("The dataframe contains no numeric columns to plot.")
 
-    columns_per_row = min(3, len(columns))
+    columns_per_row = min(4, len(columns))
     rows = math.ceil(len(columns) / columns_per_row)
     figure, axes = plt.subplots(
         rows,
@@ -73,12 +71,13 @@ def numericReview(df: pd.DataFrame) -> pd.DataFrame:
 def plot_histograms(df: pd.DataFrame) -> tuple[plt.Figure, object]:
     """Build a Seaborn histogram for each numeric dataframe column."""
     columns, figure, axes = _numeric_plot_layout(df, "Гистограммы числовых признаков")
-    for axis, column in zip(axes.flat, columns):
+    colors = sns.color_palette("husl", n_colors=len(columns))
+    for axis, column, color in zip(axes.flat, columns, colors):
         values = df[column].dropna()
         if values.empty:
             axis.text(0.5, 0.5, "нет данных", ha="center", va="center")
         else:
-            sns.histplot(x=values, color=PANEL_COLOR, ax=axis)
+            sns.histplot(x=values, color=color, ax=axis)
     _finish_panels(figure, axes, columns, ylabel="число молекул")
     return figure, axes
 
@@ -86,7 +85,8 @@ def plot_histograms(df: pd.DataFrame) -> tuple[plt.Figure, object]:
 def plot_kdes(df: pd.DataFrame) -> tuple[plt.Figure, object]:
     """Build a Seaborn KDE plot for each numeric dataframe column."""
     columns, figure, axes = _numeric_plot_layout(df, "Графики плотности числовых признаков")
-    for axis, column in zip(axes.flat, columns):
+    colors = sns.color_palette("husl", n_colors=len(columns))
+    for axis, column, color in zip(axes.flat, columns, colors):
         values = df[column].dropna()
         if values.nunique() < 2:
             axis.text(
@@ -97,7 +97,7 @@ def plot_kdes(df: pd.DataFrame) -> tuple[plt.Figure, object]:
                 va="center",
             )
         else:
-            sns.kdeplot(x=values, color=PANEL_COLOR, ax=axis)
+            sns.kdeplot(x=values, color=color, ax=axis)
     _finish_panels(figure, axes, columns, ylabel="плотность")
     return figure, axes
 
@@ -105,12 +105,13 @@ def plot_kdes(df: pd.DataFrame) -> tuple[plt.Figure, object]:
 def plot_boxplots(df: pd.DataFrame) -> tuple[plt.Figure, object]:
     """Build a Seaborn boxplot for each numeric dataframe column."""
     columns, figure, axes = _numeric_plot_layout(df, "Ящики с усами числовых признаков")
-    for axis, column in zip(axes.flat, columns):
+    colors = sns.color_palette("husl", n_colors=len(columns))
+    for axis, column, color in zip(axes.flat, columns, colors):
         values = df[column].dropna()
         if values.empty:
             axis.text(0.5, 0.5, "нет данных", ha="center", va="center")
         else:
-            sns.boxplot(x=values, color=PANEL_COLOR, ax=axis)
+            sns.boxplot(x=values, color=color, ax=axis)
     _finish_panels(figure, axes, columns)
     return figure, axes
 

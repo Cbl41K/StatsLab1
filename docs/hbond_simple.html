@@ -9964,9 +9964,29 @@ html[data-theme="dark"] {
     --jp-border-color0: #3f3f3f;
     --jp-border-color1: #4a4a4a;
     --jp-border-color2: #555;
-    --jp-cell-editor-background: #1e1e1e;
     --jp-rendermime-table-row-background: transparent;
     --jp-rendermime-table-row-hover-background: #303030;
+    --jp-cell-editor-background: #2e2e2e;
+    --jp-mirror-editor-variable-color: #e6e6e6;
+    --jp-mirror-editor-keyword-color: #7dcea0;
+    --jp-mirror-editor-builtin-color: #7dcea0;
+    --jp-mirror-editor-operator-color: #c4b6e0;
+    --jp-mirror-editor-punctuation-color: #c8c8c8;
+    --jp-mirror-editor-number-color: #e0c36a;
+    --jp-mirror-editor-string-color: #e0a070;
+    --jp-mirror-editor-string-2-color: #e0a070;
+    --jp-mirror-editor-comment-color: #8d8d8d;
+    --jp-mirror-editor-def-color: #8ec8e8;
+    --jp-mirror-editor-variable-2-color: #8ec8e8;
+    --jp-mirror-editor-variable-3-color: #7dcea0;
+    --jp-mirror-editor-property-color: #8ec8e8;
+    --jp-mirror-editor-atom-color: #8ec8e8;
+    --jp-mirror-editor-meta-color: #c4b6e0;
+    --jp-mirror-editor-qualifier-color: #b0b0b0;
+    --jp-mirror-editor-bracket-color: #b0b0b0;
+    --jp-mirror-editor-tag-color: #7dcea0;
+    --jp-mirror-editor-attribute-color: #e0c36a;
+    --jp-mirror-editor-error-color: #e07070;
 }
 body { margin: 0; font-family: sans-serif; color: var(--text); background: var(--bg); }
 .topbar { padding: 1.6rem 1.8rem; background: var(--surface); border-bottom: 1px solid var(--line); }
@@ -10107,8 +10127,75 @@ h1, h2, h3, h4, h5, h6,
 .panel th, .panel td { padding: 0.55rem 0.7rem; border: 1px solid var(--line); text-align: left; vertical-align: top; }
 .panel th { background: var(--table-head); }
 .panel td:first-child { font-family: monospace; white-space: nowrap; }
-.code-fold { margin: 0.4rem 0 0.8rem; }
-.code-fold > summary { cursor: pointer; }
+.code-fold {
+    margin: 0.4rem 0 0.8rem;
+    width: fit-content;
+    max-width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+}
+html[data-theme="dark"] .code-fold { border-color: #e6e6e6; }
+.code-fold[open] { width: 100%; }
+.code-fold > summary {
+    display: list-item;
+    cursor: pointer;
+    padding: 0.4rem 0.75rem;
+    color: var(--text);
+    background: transparent;
+}
+.code-fold[open] > summary { border-bottom: 1px solid var(--line); }
+html[data-theme="dark"] .code-fold[open] > summary { border-bottom-color: #e6e6e6; }
+body.jp-Notebook .code-fold .jp-InputArea-editor,
+body.jp-Notebook .code-fold .highlight {
+    border: none;
+    box-shadow: none;
+}
+.table-sheet {
+    margin: 0.6rem 0 0.9rem;
+    padding: 0.65rem 0.7rem;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow-x: auto;
+}
+body.jp-Notebook .table-sheet table.dataframe {
+    width: max-content;
+    border-collapse: collapse;
+    margin: 0;
+    font-size: 0.86rem;
+}
+body.jp-Notebook .table-sheet table.dataframe th,
+body.jp-Notebook .table-sheet table.dataframe td {
+    border: 1px solid var(--line);
+    padding: 0.4rem 0.55rem;
+    text-align: left;
+    vertical-align: middle;
+    color: var(--text);
+    background: transparent;
+    white-space: nowrap;
+}
+body.jp-Notebook .table-sheet table.dataframe thead th { background: var(--table-head); }
+.table-sheet-center {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+.table-sheet-center table {
+    width: max-content;
+    max-width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+.table-sheet-center th,
+.table-sheet-center td {
+    border: 1px solid var(--line);
+    padding: 0.45rem 0.7rem;
+    color: var(--text);
+}
 .sidebar {
     font-family: sans-serif;
     font-size: 16px;
@@ -10157,7 +10244,30 @@ body.jp-Notebook .jp-OutputArea-output {
     box-shadow: none;
 }
 body.jp-Notebook .jp-Collapser { display: none; }
+html[data-theme="dark"] body.jp-Notebook .jp-InputArea-editor,
+html[data-theme="dark"] body.jp-Notebook .cm-editor,
+html[data-theme="dark"] body.jp-Notebook .highlight,
+html[data-theme="dark"] body.jp-Notebook .highlight pre {
+    background: var(--surface-2);
+    color: var(--text);
+}
 body.jp-Notebook .jp-Cell-inputWrapper { padding: 0; }
+body.jp-Notebook .jp-MarkdownCell .jp-Cell-inputWrapper {
+    display: block;
+    width: 100%;
+}
+body.jp-Notebook .jp-MarkdownCell .jp-InputArea,
+body.jp-Notebook .jp-MarkdownCell .jp-RenderedMarkdown {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+body.jp-Notebook .jp-MarkdownCell .table-sheet {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
 .theme-toggle {
     position: fixed;
     right: 1rem;
@@ -10213,15 +10323,35 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.appendChild(bar);
     document.body.appendChild(layout);
 
-    var areas = document.querySelectorAll(".jp-CodeCell .jp-InputArea, .code_cell .input_area");
-    areas.forEach(function (area) {
+    function foldBlock(node, label) {
         var details = document.createElement("details");
         var summary = document.createElement("summary");
         details.className = "code-fold";
-        summary.textContent = "Код";
-        area.parentNode.insertBefore(details, area);
+        summary.textContent = label;
+        node.parentNode.insertBefore(details, node);
         details.appendChild(summary);
-        details.appendChild(area);
+        details.appendChild(node);
+    }
+    document.querySelectorAll(".jp-CodeCell .jp-InputArea, .code_cell .input_area").forEach(function (area) {
+        foldBlock(area, "Код");
+    });
+    document.querySelectorAll(".jp-RenderedImage").forEach(function (image) {
+        foldBlock(image, "График");
+    });
+    document.querySelectorAll(".jp-RenderedHTML table.dataframe").forEach(function (table) {
+        var host = table.closest(".jp-OutputArea-output") || table.parentNode;
+        if (host.closest(".table-sheet")) return;
+        var sheet = document.createElement("div");
+        sheet.className = "table-sheet";
+        host.parentNode.insertBefore(sheet, host);
+        sheet.appendChild(host);
+    });
+    document.querySelectorAll(".jp-RenderedMarkdown table").forEach(function (table) {
+        if (table.closest(".table-sheet")) return;
+        var sheet = document.createElement("div");
+        sheet.className = "table-sheet table-sheet-center";
+        table.parentNode.insertBefore(sheet, table);
+        sheet.appendChild(table);
     });
 
     if (page.sections && page.sections.length) {
