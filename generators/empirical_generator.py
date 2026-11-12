@@ -31,7 +31,7 @@ class EmpiricalCDFGenerator(BaseGenerator):
     """
 
     def __init__(self, data):
-        super().__init__(data)  # BaseGenerator: данные одномерны и непусты
+        super().__init__(data)
         values = self.data
 
         if not np.issubdtype(values.dtype, np.number) or np.issubdtype(
@@ -46,10 +46,9 @@ class EmpiricalCDFGenerator(BaseGenerator):
         sorted_data = np.sort(values)
         self.n_ = sorted_data.size
         self.support_ = np.unique(sorted_data)
-        # Индикаторная функция: число элементов выборки с x_i <= s_k
         counts_le = np.searchsorted(sorted_data, self.support_, side="right")
-        self.cdf_ = counts_le / self.n_                       # F_n(s_k); последний элемент ровно 1.0
-        self.pmf_ = np.diff(counts_le, prepend=0) / self.n_   # p_k
+        self.cdf_ = counts_le / self.n_                      
+        self.pmf_ = np.diff(counts_le, prepend=0) / self.n_   
 
     # ------------------------------------------------------------------ ЭФР и обратная функция
     def cdf(self, x):
@@ -57,7 +56,7 @@ class EmpiricalCDFGenerator(BaseGenerator):
         x = np.asarray(x, dtype=float)
         if np.any(np.isnan(x)):
             raise ValueError("x must not contain NaN")
-        k = np.searchsorted(self.support_, x, side="right")   # сколько точек носителя <= x
+        k = np.searchsorted(self.support_, x, side="right")
         return np.concatenate(([0.0], self.cdf_))[k]
 
     def ppf(self, u):
@@ -86,7 +85,7 @@ class EmpiricalCDFGenerator(BaseGenerator):
         """
         n = self._check_n(n)
         rng = np.random.default_rng(random_state)
-        u = rng.random(n)                                      # U ~ Uniform[0, 1)
+        u = rng.random(n)                             
         return self.support_[np.searchsorted(self.cdf_, u, side="left")]
 
     def __repr__(self):
