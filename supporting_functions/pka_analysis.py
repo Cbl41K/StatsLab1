@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from scipy import stats
+from sklearn.cluster import KMeans
 from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import PowerTransformer
 
@@ -263,7 +264,10 @@ def analyze_step5_sampling(pka: np.ndarray):
 
 
 def analyze_step6_models(pka: np.ndarray):
-    """Сравнивает подгонку классических законов и моделей смеси GMM по AIC/BIC."""
+    """
+    Сравнивает классические одномодальные законы с моделями на основе кластеризации K-Means
+    (2 и 3 колокола) по информационным критериям AIC/BIC.
+    """
     x_grid = np.linspace(-12, 22, 1000)
     n = len(pka)
     models = []
@@ -289,19 +293,39 @@ def analyze_step6_models(pka: np.ndarray):
     bic_t = np.log(n) * 3 - 2 * ll_t
     models.append({"Модель": "Стьюдента t (1 колокол)", "Параметров": 3, "AIC": aic_t, "BIC": bic_t})
 
-    # 4. GMM (k=2)
-    gmm2 = GaussianMixture(n_components=2, random_state=42).fit(pka.reshape(-1, 1))
-    ll_gmm2 = gmm2.score(pka.reshape(-1, 1)) * n
-    aic_gmm2 = 2 * 5 - 2 * ll_gmm2
-    bic_gmm2 = np.log(n) * 5 - 2 * ll_gmm2
-    models.append({"Модель": "Смесь Гауссиан (GMM, 2 колокола)", "Параметров": 5, "AIC": aic_gmm2, "BIC": bic_gmm2})
+    # 4. Кластеризация K-Means (k=2 колокола)
+    km2 = KMeans(n_clusters=2, random_state=42, n_init=10).fit(pka.reshape(-1, 1))
+    lbl2 = km2.labels_
+    ord2 = np.argsort(km2.cluster_centers_.flatten())
+    w2 = [np.mean(lbl2 == i) for i in ord2]
+    m2 = [pka[lbl2 == i].mean() for i in ord2]
+    s2 = [pka[lbl2 == i].std() for i in ord2]
 
-    # 5. GMM (k=3)
-    gmm3 = GaussianMixture(n_components=3, random_state=42).fit(pka.reshape(-1, 1))
-    ll_gmm3 = gmm3.score(pka.reshape(-1, 1)) * n
-    aic_gmm3 = 2 * 8 - 2 * ll_gmm3
-    bic_gmm3 = np.log(n) * 8 - 2 * ll_gmm3
-    models.append({"Модель": "Смесь Гауссиан (GMM, 3 колокола)", "Параметров": 8, "AIC": aic_gmm3, "BIC": bic_gmm3})
+    def pdf_km2(x):
+        return w2[0] * stats.norm.pdf(x, m2[0], s2[0]) + w2[1] * stats.norm.pdf(x, m2[1], s2[1])
+
+    ll_km2 = np.sum(np.log(pdf_km2(pka) + 1e-15))
+    aic_km2 = 2 * 5 - 2 * ll_km2
+    bic_km2 = np.log(n) * 5 - 2 * ll_km2
+    models.append({"Модель": "Кластеризация K-Means (2 колокола)", "Параметров": 5, "AIC": aic_km2, "BIC": bic_km2})
+
+    # 5. Кластеризация K-Means (k=3 колокола)
+    km3 = KMeans(n_clusters=3, random_state=42, n_init=10).fit(pka.reshape(-1, 1))
+    lbl3 = km3.labels_
+    ord3 = np.argsort(km3.cluster_centers_.flatten())
+    w3 = [np.mean(lbl3 == i) for i in ord3]
+    m3 = [pka[lbl3 == i].mean() for i in ord3]
+    s3 = [pka[lbl3 == i].std() for i in ord3]
+
+    def pdf_km3(x):
+        return (w3[0] * stats.norm.pdf(x, m3[0], s3[0]) +
+                w3[1] * stats.norm.pdf(x, m3[1], s3[1]) +
+                w3[2] * stats.norm.pdf(x, m3[2], s3[2]))
+
+    ll_km3 = np.sum(np.log(pdf_km3(pka) + 1e-15))
+    aic_km3 = 2 * 8 - 2 * ll_km3
+    bic_km3 = np.log(n) * 8 - 2 * ll_km3
+    models.append({"Модель": "Кластеризация K-Means (3 колокола)", "Параметров": 8, "AIC": aic_km3, "BIC": bic_km3})
 
     table = pd.DataFrame(models).sort_values("AIC").round(1)
     print("Сравнение математических моделей распределения (чем меньше AIC/BIC, тем лучше):")
@@ -312,29 +336,24 @@ def analyze_step6_models(pka: np.ndarray):
     # Сравнение плотностей
     sns.histplot(pka, bins=50, stat="density", color="#e5e5e5", edgecolor="none", ax=axes[0], label="Данные (гистограмма)")
     axes[0].plot(x_grid, stats.norm.pdf(x_grid, mu_norm, s_norm), "--", color="red", linewidth=2, label="Одиночный Гаусс (1 колокол)")
-    axes[0].plot(x_grid, np.exp(gmm2.score_samples(x_grid.reshape(-1, 1))), "-.", color="green", label="Смесь 2 колоколов")
-    axes[0].plot(x_grid, np.exp(gmm3.score_samples(x_grid.reshape(-1, 1))), "-", color="blue", linewidth=2.2, label="Смесь 3 колоколов (лучшая)")
-    axes[0].set_title("Подгонка моделей: один колокол vs смеси")
+    axes[0].plot(x_grid, pdf_km2(x_grid), "-.", color="green", linewidth=2, label="K-Means (2 колокола)")
+    axes[0].plot(x_grid, pdf_km3(x_grid), "-", color="blue", linewidth=2.2, label="K-Means (3 колокола, лучшая)")
+    axes[0].set_title("Подгонка моделей: один колокол vs составные колокола")
     axes[0].set_xlabel("cal_pka_basic")
     axes[0].set_ylabel("Плотность")
     axes[0].legend()
 
-    # Декомпозиция GMM-3
-    weights = gmm3.weights_
-    means = gmm3.means_.flatten()
-    covars = np.sqrt(gmm3.covariances_.flatten())
-    order = np.argsort(means)
-
-    labels = ["1. Нейтральные / слабые", "2. Ароматические основания", "3. Алифатические амины"]
+    # Декомпозиция K-Means 3 колокола
+    labels_names = ["1. Нейтральные / слабые", "2. Ароматические основания", "3. Алифатические амины"]
     colors = ["#2b5c8f", "#7570b3", "#d95f02"]
 
     sns.histplot(pka, bins=50, stat="density", color="#f5f5f5", edgecolor="none", ax=axes[1])
-    for rank, idx in enumerate(order):
-        pdf = weights[idx] * stats.norm.pdf(x_grid, means[idx], covars[idx])
-        axes[1].plot(x_grid, pdf, linewidth=2, color=colors[rank],
-                     label=f"{labels[rank]}: вес {weights[idx]:.0%}, μ={means[idx]:.1f}, σ={covars[idx]:.1f}")
-    axes[1].plot(x_grid, np.exp(gmm3.score_samples(x_grid.reshape(-1, 1))), "k:", linewidth=2, label="Итоговая сумма смеси")
-    axes[1].set_title("Разложение смеси 3 колоколов на химические классы")
+    for rank in range(3):
+        pdf_c = w3[rank] * stats.norm.pdf(x_grid, m3[rank], s3[rank])
+        axes[1].plot(x_grid, pdf_c, linewidth=2, color=colors[rank],
+                     label=f"{labels_names[rank]}: вес {w3[rank]:.0%}, μ={m3[rank]:.1f}, σ={s3[rank]:.1f}")
+    axes[1].plot(x_grid, pdf_km3(x_grid), "k:", linewidth=2, label="Итоговая сумма 3 колоколов")
+    axes[1].set_title("Разложение на 3 химических колокола (K-Means)")
     axes[1].set_xlabel("cal_pka_basic")
     axes[1].set_ylabel("Плотность")
     axes[1].legend()
@@ -626,7 +645,7 @@ def analyze_step7_hypothesis2_interchangeability(df: pd.DataFrame):
 
 def analyze_step7_hypothesis4_multimodal(pka: np.ndarray):
     """
-    Гипотеза 4: Одновершинная модель vs модель смеси GMM.
+    Гипотеза 4: Одновершинная модель vs составная модель 3 колоколов (K-Means).
     Критерий: Тест отношения правдоподобия (LRT).
     """
     n = len(pka)
@@ -634,9 +653,20 @@ def analyze_step7_hypothesis4_multimodal(pka: np.ndarray):
     mu, s = stats.norm.fit(pka)
     ll_1 = np.sum(stats.norm.logpdf(pka, mu, s))
 
-    # 3 колокола (GMM)
-    gmm = GaussianMixture(n_components=3, random_state=42).fit(pka.reshape(-1, 1))
-    ll_3 = gmm.score(pka.reshape(-1, 1)) * n
+    # 3 колокола (K-Means)
+    km3 = KMeans(n_clusters=3, random_state=42, n_init=10).fit(pka.reshape(-1, 1))
+    lbl3 = km3.labels_
+    ord3 = np.argsort(km3.cluster_centers_.flatten())
+    w3 = [np.mean(lbl3 == i) for i in ord3]
+    m3 = [pka[lbl3 == i].mean() for i in ord3]
+    s3 = [pka[lbl3 == i].std() for i in ord3]
+
+    def pdf_km3(x):
+        return (w3[0] * stats.norm.pdf(x, m3[0], s3[0]) +
+                w3[1] * stats.norm.pdf(x, m3[1], s3[1]) +
+                w3[2] * stats.norm.pdf(x, m3[2], s3[2]))
+
+    ll_3 = np.sum(np.log(pdf_km3(pka) + 1e-15))
 
     # Тест отношения правдоподобия: LRT = 2 * (ll_3 - ll_1) ~ chi2(df = 8 - 2 = 6)
     lr_stat = 2 * (ll_3 - ll_1)
@@ -647,8 +677,8 @@ def analyze_step7_hypothesis4_multimodal(pka: np.ndarray):
     x_grid = np.linspace(-10, 20, 500)
     sns.histplot(pka, bins=45, stat="density", color="#e5e5e5", ax=ax, label="Данные")
     ax.plot(x_grid, stats.norm.pdf(x_grid, mu, s), "--", color="red", linewidth=2, label="H0: Одновершинная модель (Гаусс)")
-    ax.plot(x_grid, np.exp(gmm.score_samples(x_grid.reshape(-1, 1))), "-", color="blue", linewidth=2.2, label="H1: Смесь 3 колоколов (GMM)")
-    ax.set_title("Проверка гипотезы 4: Одиночный колокол vs Смесь")
+    ax.plot(x_grid, pdf_km3(x_grid), "-", color="blue", linewidth=2.2, label="H1: Составная модель 3 колоколов (K-Means)")
+    ax.set_title("Проверка гипотезы 4: Одиночный колокол vs 3 колокола (K-Means)")
     ax.set_xlabel("cal_pka_basic")
     ax.set_ylabel("Плотность")
     ax.legend()
