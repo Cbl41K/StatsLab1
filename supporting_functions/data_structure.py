@@ -36,6 +36,8 @@ def numericReview(df: pd.DataFrame) -> pd.DataFrame:
             "mean_value": pd.NA,
             "median_value": pd.NA,
             "std": pd.NA,
+            "Q25": pd.NA,
+            "Q75": pd.NA,
             "iqr": pd.NA,
         },
         index=df.columns,
@@ -43,10 +45,14 @@ def numericReview(df: pd.DataFrame) -> pd.DataFrame:
 
     for column in df.select_dtypes(include="number").columns:
         values = normalized[column].dropna()
+        q25 = values.quantile(0.25)
+        q75 = values.quantile(0.75)
         summary.loc[column, "mean_value"] = values.mean()
         summary.loc[column, "median_value"] = values.median()
         summary.loc[column, "std"] = values.std()
-        summary.loc[column, "iqr"] = values.quantile(0.75) - values.quantile(0.25)
+        summary.loc[column, "Q25"] = q25
+        summary.loc[column, "Q75"] = q75
+        summary.loc[column, "iqr"] = q75 - q25
 
     summary.index.name = "column_name"
     return summary

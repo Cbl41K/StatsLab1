@@ -6,6 +6,7 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """Drop selected columns and rows with at least two missing values."""
     columns_to_drop = [
         "Unnamed: 0",
+        "type",
         "exp_molecular_weight",
         "exp_pka",
         "exp_logp",
