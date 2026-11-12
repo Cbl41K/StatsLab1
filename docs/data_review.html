@@ -9135,11 +9135,33 @@ body { margin: 0; font-family: sans-serif; color: var(--text); background: var(-
     border-radius: 8px;
 }
 .sidebar-box > a,
-.sidebar-box > details { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+.sidebar-box > details {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
 .sidebar-box > a,
-.sidebar-box > details > summary { display: block; padding: 0.8rem 1rem; border-radius: 6px; }
-.sidebar-box > a:hover,
-.sidebar-box > details > summary:hover { background: var(--hover); }
+.sidebar-box > details > summary {
+    display: block;
+    padding: 0.8rem 1rem;
+    border-radius: 6px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+.sidebar-nav-section .sidebar-nav-panel {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.48s ease, opacity 0.4s ease;
+}
+.sidebar-nav-section.is-open:not(.is-retracting) .sidebar-nav-panel {
+    max-height: 32rem;
+    opacity: 1;
+}
+.sidebar-nav-section.is-retracting .sidebar-nav-panel {
+    max-height: 0;
+    opacity: 0;
+}
 .sidebar details details { margin: 0.65rem 0.6rem; background: var(--surface-2); border: 1px solid var(--line-faint); border-radius: 6px; }
 .sidebar details details > summary { display: block; padding: 0; border-radius: 6px; }
 .sidebar details details > summary a { display: block; padding: 0.6rem 0.75rem; border-radius: 6px; }
@@ -9158,34 +9180,345 @@ body { margin: 0; font-family: sans-serif; color: var(--text); background: var(-
 .toc-pop .open-notebook { display: block; padding: 0.35rem 0.6rem; }
 .sidebar .toc { margin: 0.2rem 0 0.4rem 1rem; padding: 0; list-style: none; }
 .sidebar .empty { margin: 0.2rem 0.6rem 0.6rem; color: var(--muted-2); font-size: 0.9rem; }
-.page-toc { left: auto; right: 1rem; }
-.page-toc .sidebar-box { gap: 0.4rem; padding: 0.45rem; overscroll-behavior: contain; }
-.page-toc .sidebar-box > a { display: block; padding: 0.45rem 0.7rem; border-radius: 6px; font-size: 0.92rem; line-height: 1.3; }
-.page-toc .sidebar-box > a:hover { background: var(--hover); }
-.page-toc .sidebar-box > a.is-current,
-.page-toc .sidebar-box > a.is-current:hover { background: var(--current); }
+.sidebar.page-toc {
+    left: auto;
+    right: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.55rem;
+}
+.page-toc .sidebar-box.page-toc-box {
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 0.55rem;
+    padding: 0.45rem;
+    overscroll-behavior: contain;
+}
+.page-toc .sidebar-box.feature-lookup-box {
+    flex: 0 0 auto;
+    padding: 0;
+    border: none;
+    background: transparent;
+    overflow: visible;
+}
+.page-toc-scroll {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+}
+.page-toc .page-toc-scroll > a {
+    display: block;
+    padding: 0.45rem 0.7rem;
+    border-radius: 6px;
+    font-size: 0.92rem;
+    line-height: 1.3;
+    border: 1px solid var(--line-faint);
+    background: var(--surface-2);
+}
+.page-toc .page-toc-scroll > a:hover { background: var(--hover); }
+.page-toc .page-toc-scroll > a.is-current,
+.page-toc .page-toc-scroll > a.is-current:hover {
+    border-color: var(--heading);
+    color: var(--heading);
+    background: var(--accent-bg);
+}
+.feature-lookup-field {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+    border: 1px solid var(--line-faint);
+    border-radius: 6px;
+    background: var(--surface-2);
+    overflow: hidden;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+.feature-lookup-field.is-match {
+    border-color: var(--heading);
+}
+.feature-lookup-field.is-invalid { border-color: #c55; }
+.feature-lookup-search {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0 0.55rem 0 0.65rem;
+    min-height: 2.35rem;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+.feature-lookup-field.is-match .feature-lookup-search {
+    color: var(--heading);
+    background: var(--accent-bg);
+}
+.feature-lookup-icon {
+    flex: 0 0 auto;
+    display: flex;
+    width: 1.05rem;
+    height: 1.05rem;
+    color: var(--muted-2);
+}
+.feature-lookup-field.is-match .feature-lookup-icon { color: var(--heading); }
+.feature-lookup-icon svg { display: block; width: 100%; height: 100%; }
+.feature-lookup-input {
+    display: block;
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 0.45rem 0.65rem 0.45rem 0;
+    border: 0;
+    border-radius: 0;
+    font: inherit;
+    font-size: 0.92rem;
+    line-height: 1.3;
+    color: var(--text);
+    background: transparent;
+    transition: color 0.15s ease;
+}
+.feature-lookup-field.is-match .feature-lookup-input { color: var(--heading); }
+.feature-lookup-input:focus { outline: none; }
+.feature-lookup-input::placeholder { color: var(--muted-2); }
+.feature-lookup-result {
+    padding: 0.5rem 0.7rem 0.65rem;
+    border-top: 1px solid var(--line-soft);
+    font-size: 0.84rem;
+    line-height: 1.4;
+}
+.feature-lookup-desc { margin: 0 0 0.35rem; color: var(--text); }
+.feature-lookup-kind { margin: 0; color: var(--muted-2); font-size: 0.8rem; }
+.feature-lookup-miss { margin: 0; color: var(--muted-2); }
 .prose p { margin: 0 0 0.85rem; font-size: 1.05rem; line-height: 1.6; }
 .prose p:last-child { margin-bottom: 0; }
-.tree { display: flex; flex-direction: column; align-items: center; margin: 2.6rem 0 2.4rem; }
-.scheme-card { display: flex; flex-direction: column; align-items: flex-start; gap: 0.28rem; width: 100%; min-height: 14rem; padding: 0.85rem 0.95rem; background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; box-sizing: border-box; }
-.scheme-card span { color: var(--muted); font-size: 0.86rem; }
-.scheme-card strong { font-size: 1rem; line-height: 1.3; }
-.scheme-card .note { line-height: 1.35; }
-.tree-root { position: relative; width: min(100%, 24rem); z-index: 1; }
-.tree-root::after { content: ""; position: absolute; left: 50%; top: 100%; height: 1.4rem; border-left: 1px solid var(--scheme-line); }
-.tree-side { position: relative; width: 100%; margin-top: 1.4rem; padding-left: calc(50% + 1.35rem); box-sizing: border-box; }
-.tree-side::before { content: ""; position: absolute; left: 50%; top: 0; height: calc(100% + 8rem + 1.7rem); border-left: 1px solid var(--scheme-line); }
-.tree-side .scheme-card { position: relative; z-index: 1; width: 100%; max-width: 20rem; }
-.tree-side .scheme-card::before { content: ""; position: absolute; right: 100%; top: 50%; width: 1.35rem; border-top: 1px dashed var(--scheme-dash); }
-.tree-fork { display: flex; justify-content: center; align-items: stretch; gap: 3.2rem; width: 100%; margin-top: 8rem; }
-.tree-fork .scheme-card { position: relative; z-index: 1; width: min(17.5rem, calc(50% - 1.6rem)); }
-.tree-fork .scheme-card:first-child::after { content: ""; position: absolute; left: 100%; top: 1.7rem; width: 1.6rem; border-top: 1px solid var(--scheme-line); }
-.tree-fork .scheme-card:last-child::before { content: ""; position: absolute; right: 100%; top: 1.7rem; width: 1.6rem; border-top: 1px solid var(--scheme-line); }
+.prose-intro { font-size: 1.02rem; line-height: 1.72; }
+.prose-intro p { margin: 0 0 1.45rem; }
+.prose-intro p:last-child {
+    margin-top: 0.5rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--line-soft);
+    font-size: 0.94rem;
+    line-height: 1.62;
+    color: var(--muted);
+}
+.prose-intro p > strong {
+    display: block;
+    margin-bottom: 0.45rem;
+    font-size: 1.14rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--heading);
+    letter-spacing: 0.01em;
+}
+.prose-intro p:first-child > strong { font-size: 1.18rem; }
+.prose-intro p:first-child {
+    font-size: 1.06rem;
+    line-height: 1.75;
+}
+.panel#vvedenie h2 {
+    margin-bottom: 1.15rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--line-soft);
+}
+.scheme-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.28rem;
+    width: 100%;
+    max-width: 17.5rem;
+    padding: 0.85rem 0.95rem;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+.scheme-card strong { font-size: 1rem; line-height: 1.3; font-weight: 600; }
+.scheme-kicker { color: var(--muted); font-size: 0.86rem; }
+.scheme-author { color: var(--muted-2); font-size: 0.78rem; line-height: 1.3; }
+.scheme-note { color: var(--muted); font-size: 0.84rem; line-height: 1.35; }
+.tree-v2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 2.2rem 0 2.4rem;
+    --tree-thick: 9px;
+    --tree-arm: 2.35rem;
+    --tree-arm-wide: 1.88rem;
+    --tree-card: 16.75rem;
+    --tree-card-leaf: 13.96rem;
+}
+.tree-v2 .scheme-card--leaf {
+    width: var(--tree-card-leaf);
+    max-width: var(--tree-card-leaf);
+    padding: 0.72rem 0.8rem;
+    box-sizing: border-box;
+}
+.tree-v2 .scheme-card--leaf strong { font-size: 0.92rem; }
+.tree-v2 .scheme-card--leaf .scheme-author { font-size: 0.72rem; }
+.tree-v2-root { --tree-arm: 3.65rem; }
+.tree-v2-root .scheme-card {
+    width: var(--tree-card);
+    max-width: var(--tree-card);
+    box-sizing: border-box;
+}
+.tree-v2-root {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0;
+    column-gap: 0.25rem;
+    width: min(100%, 52rem);
+}
+.tree-v2-sprint-mid .scheme-card--sprint-wide {
+    width: var(--tree-card);
+    max-width: var(--tree-card);
+    min-width: var(--tree-card);
+    min-height: 9.75rem;
+    padding: 0.95rem 0.95rem 1.05rem;
+    justify-content: flex-start;
+    align-items: flex-start;
+    box-sizing: border-box;
+}
+.tree-v2-sprint-mid .scheme-card--sprint-wide .scheme-note { line-height: 1.35; }
+.scheme-sprint-extra {
+    width: 100%;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--line-soft);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.28rem;
+}
+.scheme-sprint-extra strong { font-size: 0.96rem; }
+.tree-v2-side { display: flex; align-items: center; gap: 0; min-width: 0; }
+.tree-v2-side--left { justify-content: flex-end; }
+.tree-v2-side--right { justify-content: flex-start; }
+.tree-v2-hbar--thin {
+    display: block;
+    width: var(--tree-arm);
+    height: 0;
+    flex: 0 0 var(--tree-arm);
+    border-top: 1px solid var(--scheme-line);
+    background: none;
+}
+.tree-v2-hbar--thick {
+    display: block;
+    width: var(--tree-arm);
+    height: var(--tree-thick);
+    flex: 0 0 var(--tree-arm);
+    background: var(--heading);
+    border-radius: 2px;
+    align-self: center;
+}
+.tree-v2-hbar--dash { border-top-style: dashed; border-top-color: var(--scheme-dash); }
+.tree-v2-hbar--muted { border-top-color: var(--line); }
+.tree-v2-vbar--thin {
+    display: block;
+    width: 0;
+    height: 1.6rem;
+    margin: 0.2rem auto;
+    border-left: 1px solid var(--scheme-line);
+}
+.tree-v2-vbar--trunk {
+    height: 8rem;
+    margin: 0 auto;
+    flex-shrink: 0;
+}
+.tree-v2-trunk-node {
+    display: flex;
+    justify-content: center;
+    width: min(100%, 58rem);
+}
+.tree-v2-trunk-node .scheme-card {
+    width: var(--tree-card);
+    max-width: var(--tree-card);
+}
+.tree-v2-sprint {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: min(100%, 58rem);
+}
+.tree-v2-sprint-row {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: center;
+    gap: 0;
+    width: 100%;
+    --tree-arm: var(--tree-arm-wide);
+}
+.tree-v2-sprint-row--wide { width: min(100%, 58rem); }
+.tree-v2-sprint-mid {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    flex: 0 0 auto;
+    align-self: stretch;
+}
+.tree-v2-sprint-mid .scheme-card--sprint-wide {
+    flex: 1 1 auto;
+    align-self: stretch;
+    height: 100%;
+}
+.tree-v2-leaves {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 0.35rem 0;
+    flex: 0 0 auto;
+    align-self: center;
+}
+.scheme-card--leaf-tbd {
+    border-color: var(--line-faint);
+    border-style: dashed;
+    opacity: 0.7;
+}
+.scheme-card--leaf-tbd strong { color: var(--muted-2); font-weight: 500; }
+.tree-v2-leaves--left { align-items: flex-end; padding-right: 0; }
+.tree-v2-leaves--right { align-items: flex-start; padding-left: 0; }
+.tree-v2-leaf-row { display: flex; align-items: center; gap: 0; }
+.scheme-card--main,
+.scheme-card--sprint,
+.scheme-card--leaf { border-color: var(--heading); }
+.scheme-card--side {
+    border-color: var(--muted);
+    background: var(--surface);
+    color: var(--muted-2);
+}
+.scheme-card--side strong { color: var(--text); font-weight: 500; }
+.scheme-card--ghost.scheme-card--minor {
+    border-color: var(--line-faint);
+    background: transparent;
+    color: var(--muted-2);
+    opacity: 0.92;
+}
+.scheme-card--ghost.scheme-card--minor strong {
+    color: var(--muted-2);
+    font-weight: 500;
+    font-size: 0.88rem;
+}
+.tree-v2-root .scheme-card--sources-compact {
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    padding: 0.5rem 0.7rem;
+    gap: 0;
+}
+.tree-v2-root .scheme-card--sources-compact strong {
+    font-size: 0.92rem;
+}
 .route { list-style: none; margin: 0; padding: 0; counter-reset: stop; }
 .route > li { display: grid; grid-template-columns: 2.3rem 1fr; gap: 0.75rem; padding: 0.95rem 0; border-top: 1px solid var(--line-soft); }
 .route > li::before { counter-increment: stop; content: counter(stop); width: 2.3rem; height: 2.3rem; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); font-weight: 600; }
 .route h3 { margin: 0.15rem 0 0.35rem; font-size: 1.05rem; }
 .route p { margin: 0; line-height: 1.55; }
+.route p.route-sub { margin-top: 0.55rem; color: var(--muted); font-size: 0.98rem; }
 .code { font-family: monospace; font-size: 0.92em; }
 .content { margin-left: 22rem; margin-right: 22rem; min-width: 0; padding: 1.5rem 1rem 3rem 1rem; }
 .panel { width: 100%; padding: 1.3rem 1.5rem; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; box-sizing: border-box; }
@@ -9203,26 +9536,32 @@ h1, h2, h3, h4, h5, h6,
 .jp-RenderedHTMLCommon h4,
 .jp-RenderedHTMLCommon h5,
 .jp-RenderedHTMLCommon h6 { color: var(--heading); }
-.scheme-card { border-color: var(--heading); }
 .route > li::before { color: var(--heading); border-color: var(--heading); }
 .team th,
 .team .roles { color: var(--heading); }
 .sidebar:not(.page-toc) .sidebar-box > a:hover,
+.sidebar:not(.page-toc) .sidebar-box > a.is-current,
+.sidebar:not(.page-toc) .sidebar-box > a.is-current:hover {
+    color: var(--heading);
+    border-color: var(--heading);
+    background: var(--accent-bg);
+}
+.sidebar:not(.page-toc) .sidebar-box > details:has(> summary:hover) {
+    border-color: var(--heading);
+    background: var(--accent-bg);
+}
+.sidebar:not(.page-toc) .sidebar-box > details > summary:hover {
+    color: var(--heading);
+    background: var(--accent-bg);
+}
 .sidebar:not(.page-toc) .notebook-link:hover,
 .sidebar:not(.page-toc) details details > summary a:hover {
     color: var(--heading);
     border-color: var(--heading);
     background: var(--accent-bg);
 }
-.sidebar:not(.page-toc) .sidebar-box > details:hover { border-color: var(--heading); }
-.sidebar:not(.page-toc) .sidebar-box > details > summary:hover {
-    color: var(--heading);
-    background: var(--accent-bg);
-}
-.page-toc .sidebar-box > a.is-current,
-.page-toc .sidebar-box > a.is-current:hover,
-.sidebar:not(.page-toc) .sidebar-box > a.is-current,
-.sidebar:not(.page-toc) .sidebar-box > a.is-current:hover,
+.page-toc .page-toc-scroll > a.is-current,
+.page-toc .page-toc-scroll > a.is-current:hover,
 .sidebar:not(.page-toc) .notebook-link.is-current,
 .sidebar:not(.page-toc) .notebook-link.is-current:hover {
     color: var(--heading);
@@ -9239,7 +9578,13 @@ h1, h2, h3, h4, h5, h6,
 }
 .team .files { margin: 0.35rem 0 0; color: var(--muted-2); font-size: 0.86rem; }
 .team .role { margin: 0.55rem 0 0; line-height: 1.5; }
-.lead { margin: 0; font-size: 1.05rem; line-height: 1.55; }
+.cat-mark-title {
+    margin: 1.75rem 0 0.65rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--heading);
+}
+.cat-mark-table { margin-top: 0; }
 .panel table { width: 100%; border-collapse: collapse; margin-top: 0.4rem; }
 .panel th, .panel td { padding: 0.55rem 0.7rem; border: 1px solid var(--line); text-align: left; vertical-align: top; }
 .panel th { background: var(--table-head); }
@@ -9341,6 +9686,19 @@ body.jp-Notebook .table-sheet table.dataframe thead th { background: var(--table
     font-weight: 400;
     line-height: 1.3;
 }
+.sidebar:not(.page-toc) .byline-reveal .byline {
+    margin-top: 0;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: opacity 0.15s ease, max-height 0.15s ease, margin-top 0.15s ease;
+}
+.sidebar:not(.page-toc) .byline-reveal:hover .byline,
+.sidebar:not(.page-toc) .byline-reveal.is-current .byline {
+    max-height: 2.5rem;
+    opacity: 1;
+    margin-top: 0.18rem;
+}
 body.jp-Notebook { background: var(--bg); color: var(--text); }
 body.jp-Notebook main {
     display: block;
@@ -9411,7 +9769,7 @@ html[data-theme="dark"] .dataframe td {
     border-color: var(--line);
 }
 </style>
-<script>window.PAGE_CHROME = {"kicker": "Лабораторная работа 01", "title": "Инфохимия. Статистический анализ свойств молекул", "sidebar": "<div class=\"sidebar-box\">\n<a href=\"index.html\">О работе</a>\n<details><summary>Данные</summary>\n<a class=\"notebook-link\" href=\"data_review.html\">Обзор данных<span class=\"byline\">Сычев Александр | 467653</span></a>\n<details><summary><a href=\"features.html\">Описание признаков<span class=\"byline\">Сычев Александр | 467653</span></a></summary></details>\n</details>\n<details><summary>Спринт 1</summary>\n<a class=\"notebook-link\" href=\"hbond_simple.html\">Акцепторы и доноры<span class=\"byline\">Петрунина Анна | 327017</span></a>\n</details>\n<details><summary>Спринт 2</summary>\n<p class=\"empty\">Ноутбуков пока нет</p>\n</details>\n<details><summary>Материалы</summary>\n<details><summary><a href=\"materials.html\">Источники</a></summary></details>\n</details>\n</div>", "sections": [{"title": "1. Цели обзора", "href": "#goals"}, {"title": "2. Критерии описания данных", "href": "#criteria"}, {"title": "3. Экспериментальные колонки", "href": "#exp"}, {"title": "4. Очистка", "href": "#clean"}, {"title": "5. Распределения", "href": "#dist"}, {"title": "6. Выбросы", "href": "#outliers"}, {"title": "7. Корреляционный анализ", "href": "#corr"}, {"title": "8. Итоги обзора и план дальнейшего исследования", "href": "#plan"}, {"title": "8.1. Предварительные гипотезы", "href": "#hyp"}, {"title": "8.2. Предварительные кандидаты для анализа", "href": "#candidates"}, {"title": "8.3. План анализа случайной величины", "href": "#analysis-plan"}, {"title": "8.4. Дальнейшие этапы", "href": "#next"}]};</script>
+<script>window.PAGE_CHROME = {"kicker": "Лабораторная работа 01", "title": "Инфохимия. Статистический анализ свойств молекул", "sidebar": "<div class=\"sidebar-box\">\n<a href=\"index.html\">О работе</a>\n<details class=\"sidebar-nav-section\" open><summary>Данные</summary>\n<div class=\"sidebar-nav-panel\">\n<a class=\"notebook-link\" href=\"data_review.html\">Обзор данных<span class=\"byline\">Сычев Александр | 467653</span></a>\n<a class=\"notebook-link\" href=\"features.html\">Описание признаков<span class=\"byline\">Сычев Александр | 467653</span></a>\n</div></details>\n<details class=\"sidebar-nav-section\" open><summary>Спринт 1</summary>\n<div class=\"sidebar-nav-panel\">\n<a class=\"notebook-link\" href=\"hbond_simple.html\">Акцепторы и доноры<span class=\"byline\">Петрунина Анна | 327017</span></a>\n<a class=\"notebook-link\" href=\"logs_mw_ktvd.html\">Растворимость и молекулярная масса<span class=\"byline\">Закликовский Иван | 503803</span></a>\n</div></details>\n<details class=\"sidebar-nav-section\" open><summary>Спринт 2</summary>\n<div class=\"sidebar-nav-panel\">\n<p class=\"empty\">Ноутбуков пока нет</p>\n</div></details>\n<a class=\"byline-reveal\" href=\"generator_viz.html\">Визуализация генератора<span class=\"byline\">Закликовский Иван | 503803</span></a>\n<a href=\"materials.html\">Источники</a>\n</div>", "sections": [{"title": "1. Цели обзора", "href": "#goals"}, {"title": "2. Критерии описания данных", "href": "#criteria"}, {"title": "3. Экспериментальные колонки", "href": "#exp"}, {"title": "4. Очистка", "href": "#clean"}, {"title": "5. Распределения", "href": "#dist"}, {"title": "6. Выбросы", "href": "#outliers"}, {"title": "7. Корреляционный анализ", "href": "#corr"}, {"title": "8. Итоги обзора и план дальнейшего исследования", "href": "#plan"}, {"title": "8.1. Предварительные гипотезы", "href": "#hyp"}, {"title": "8.2. Предварительные кандидаты для анализа", "href": "#candidates"}, {"title": "8.3. План анализа случайной величины", "href": "#analysis-plan"}, {"title": "8.4. Дальнейшие этапы", "href": "#next"}], "featureLookup": true, "featureGlossary": {"drugbank_id": {"description": "Уникальный идентификатор вещества в базе DrugBank", "kind": "Идентификатор"}, "name": {"description": "Название лекарственного вещества", "kind": "Строковый"}, "state": {"description": "Физическое состояние вещества (например, твёрдое, жидкое, газообразное)", "kind": "Категориальный"}, "cal_logp": {"description": "Расчётный логарифм коэффициента распределения вещества между октанолом и водой; характеризует липофильность", "kind": "Количественный, непрерывный"}, "cal_logs": {"description": "Расчётный логарифм растворимости вещества в воде (logS)", "kind": "Количественный, непрерывный"}, "cal_water_solubility": {"description": "Расчётная растворимость вещества в воде", "kind": "Количественный, непрерывный"}, "cal_molecular_weight": {"description": "Расчётная молекулярная масса вещества", "kind": "Количественный, непрерывный"}, "cal_polar_surface_area": {"description": "Расчётная площадь полярной поверхности молекулы (PSA)", "kind": "Количественный, непрерывный"}, "cal_refractivity": {"description": "Расчётная молярная рефракция — характеристика, связанная с поляризуемостью и объёмом электронной оболочки молекулы", "kind": "Количественный, непрерывный"}, "cal_polarizability": {"description": "Расчётная поляризуемость молекулы — способность электронной оболочки деформироваться под действием внешнего электрического поля", "kind": "Количественный, непрерывный"}, "cal_rotatable_bond_count": {"description": "Количество вращаемых связей в молекуле; характеризует её конформационную гибкость", "kind": "Количественный, дискретный"}, "cal_h_bond_acceptor_count": {"description": "Количество атомов или центров молекулы, способных принимать водородные связи", "kind": "Количественный, дискретный"}, "cal_h_bond_donor_count": {"description": "Количество атомов или групп, способных выступать донорами водородных связей", "kind": "Количественный, дискретный"}, "cal_pka_acidic": {"description": "Расчётное значение pKa для кислотных центров молекулы", "kind": "Количественный, непрерывный"}, "cal_pka_basic": {"description": "Расчётное значение pKa для основных центров молекулы", "kind": "Количественный, непрерывный"}, "cal_physiological_charge": {"description": "Расчётный суммарный заряд молекулы при физиологическом pH", "kind": "Количественный, дискретный"}, "cal_number_of_rings": {"description": "Количество циклов в структуре молекулы", "kind": "Количественный, дискретный"}, "cal_bioavailability": {"description": "Бинарный признак биодоступности вещества", "kind": "Категориальный, бинарный"}, "cal_rule_of_five": {"description": "Бинарный признак соответствия вещества правилу пяти Липински", "kind": "Категориальный, бинарный"}, "exp_molecular_weight": {"description": "Экспериментальное значение молекулярной массы", "kind": "Количественный, непрерывный"}, "exp_logp": {"description": "Экспериментальное значение логарифма коэффициента распределения октанол–вода", "kind": "Количественный, непрерывный"}, "exp_pka": {"description": "Экспериментальное значение константы кислотности (pKa)", "kind": "Количественный, непрерывный"}, "half_life": {"description": "Период полувыведения вещества из организма; значения представлены текстовыми описаниями с указанием временных единиц измерения", "kind": "Строковый"}}};</script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     var page = window.PAGE_CHROME;
@@ -9431,6 +9789,35 @@ document.addEventListener("DOMContentLoaded", function () {
         var href = (link.getAttribute("href") || "").split("#")[0].split("?")[0];
         if (href.split("/").pop() === pageName) link.classList.add("is-current");
     });
+    var navBox = aside.querySelector(".sidebar-box");
+    var NAV_CLOSE_MS = 520;
+    if (navBox) {
+        Array.prototype.forEach.call(navBox.children, function (node) {
+            if (node.tagName !== "DETAILS" || !node.classList.contains("sidebar-nav-section")) {
+                return;
+            }
+            function sectionHasCurrent() {
+                return !!node.querySelector(".is-current");
+            }
+            node.open = true;
+            if (sectionHasCurrent()) node.classList.add("is-open");
+            var summary = node.querySelector("summary");
+            if (!summary) return;
+            summary.addEventListener("click", function (e) {
+                e.preventDefault();
+                if (node.classList.contains("is-open")) {
+                    node.classList.add("is-retracting");
+                    clearTimeout(node._navCloseTimer);
+                    node._navCloseTimer = setTimeout(function () {
+                        node.classList.remove("is-open", "is-retracting");
+                    }, NAV_CLOSE_MS);
+                    return;
+                }
+                node.classList.remove("is-retracting");
+                node.classList.add("is-open");
+            });
+        });
+    }
     content.className = "content";
     while (document.body.firstChild) {
         content.appendChild(document.body.firstChild);
@@ -9471,23 +9858,94 @@ document.addEventListener("DOMContentLoaded", function () {
         sheet.appendChild(table);
     });
 
+    function buildFeatureLookup(glossary, host) {
+        var field = document.createElement("div");
+        field.className = "feature-lookup-field";
+        var searchRow = document.createElement("div");
+        searchRow.className = "feature-lookup-search";
+        var icon = document.createElement("span");
+        icon.className = "feature-lookup-icon";
+        icon.setAttribute("aria-hidden", "true");
+        icon.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="M16 16l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>';
+        var input = document.createElement("input");
+        input.type = "text";
+        input.className = "feature-lookup-input";
+        input.setAttribute("autocomplete", "off");
+        input.setAttribute("spellcheck", "false");
+        input.placeholder = "Признак из таблицы (cal_logs)";
+        var result = document.createElement("div");
+        result.className = "feature-lookup-result";
+        result.hidden = true;
+        searchRow.appendChild(icon);
+        searchRow.appendChild(input);
+        field.appendChild(searchRow);
+        field.appendChild(result);
+        host.appendChild(field);
+
+        var byLower = {};
+        Object.keys(glossary).forEach(function (key) {
+            byLower[key.toLowerCase()] = key;
+        });
+
+        function apply() {
+            var raw = input.value.trim();
+            field.classList.remove("is-match", "is-invalid");
+            if (!raw) {
+                result.hidden = true;
+                result.textContent = "";
+                return;
+            }
+            var key = byLower[raw.toLowerCase()];
+            if (!key) {
+                result.hidden = false;
+                field.classList.add("is-invalid");
+                result.innerHTML = '<p class="feature-lookup-miss">Нет такого признака в таблице</p>';
+                return;
+            }
+            var item = glossary[key];
+            field.classList.add("is-match");
+            result.hidden = false;
+            result.innerHTML =
+                '<p class="feature-lookup-desc">' + item.description + "</p>"
+                + '<p class="feature-lookup-kind">' + item.kind + "</p>";
+        }
+
+        input.addEventListener("change", apply);
+        input.addEventListener("blur", apply);
+        input.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                apply();
+            }
+        });
+    }
+
     if (page.sections && page.sections.length) {
         var right = document.createElement("aside");
         var box = document.createElement("div");
+        var scroll = document.createElement("div");
         right.className = "sidebar page-toc";
-        box.className = "sidebar-box";
+        box.className = "sidebar-box page-toc-box";
+        scroll.className = "page-toc-scroll";
         page.sections.forEach(function (section) {
             var link = document.createElement("a");
             link.href = section.href;
             link.textContent = section.title;
-            box.appendChild(link);
+            scroll.appendChild(link);
         });
+        box.appendChild(scroll);
         right.appendChild(box);
+        if (page.featureLookup && page.featureGlossary && Object.keys(page.featureGlossary).length) {
+            var lookupBox = document.createElement("div");
+            lookupBox.className = "sidebar-box feature-lookup-box";
+            buildFeatureLookup(page.featureGlossary, lookupBox);
+            right.appendChild(lookupBox);
+        }
         document.body.appendChild(right);
     }
 
     var sidebars = document.querySelectorAll(".sidebar");
-    var tocBox = document.querySelector(".page-toc .sidebar-box");
+    var tocBox = document.querySelector(".page-toc-scroll");
     var tocLinks = tocBox ? tocBox.querySelectorAll("a") : [];
     var headings = [];
     tocLinks.forEach(function (link) {
@@ -9534,12 +9992,17 @@ document.addEventListener("DOMContentLoaded", function () {
         var rest = restingTop();
         var top = rest - Math.min(window.scrollY, limit);
         sidebars.forEach(function (sidebar) {
-            sidebar.style.top = top + "px";
+            var lift = sidebar.classList.contains("page-toc") ? 80 : 0;
+            sidebar.style.top = (top - lift) + "px";
         });
         var room = window.innerHeight - 2 * rest + 128;
         var maxFit = window.innerHeight - (rest - limit) - 16;
         var maxHeight = Math.max(160, Math.min(room, maxFit)) + "px";
         document.querySelectorAll(".sidebar-box").forEach(function (box) {
+            if (box.classList.contains("feature-lookup-box")) {
+                box.style.maxHeight = "";
+                return;
+            }
             box.style.maxHeight = maxHeight;
         });
         markCurrent();

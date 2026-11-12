@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 from string import Template
 
@@ -17,6 +18,8 @@ AUTHORS = {
     "features.html": "Сычев Александр | 467653",
     "data_review.html": "Сычев Александр | 467653",
     "hbond_simple.html": "Петрунина Анна | 327017",
+    "logs_mw_ktvd.html": "Закликовский Иван | 503803",
+    "generator_viz.html": "Закликовский Иван | 503803",
 }
 
 SPRINTS = [
@@ -24,9 +27,22 @@ SPRINTS = [
         "Спринт 1",
         [
             ("notebooks/hbond_simple.ipynb", "Акцепторы и доноры", "hbond_simple.html"),
+            (
+                "notebooks/logs_mw_ktvd.ipynb",
+                "Растворимость и молекулярная масса",
+                "logs_mw_ktvd.html",
+            ),
         ],
     ),
     ("Спринт 2", []),
+]
+
+EXTRA_MENU_NOTEBOOKS = [
+    (
+        "notebooks/generator_viz.ipynb",
+        "Визуализация генератора",
+        "generator_viz.html",
+    ),
 ]
 
 INDEX_SECTIONS = [
@@ -35,46 +51,294 @@ INDEX_SECTIONS = [
     {"title": "Команда", "href": "#komanda"},
 ]
 
-GUIDE = """
-<p class="lead">Меню слева разложено по разделам работы. Сам материал читается от обзора данных: это общий ствол. От него в сторону отходит описание признаков — словарь, если в таблице встретилось непонятное имя столбца. Две основные ветки от того же обзора — два спринта. Эта страница стоит перед схемой, источники — после неё.</p>
-<div class="tree">
-<div class="scheme-card tree-root"><span>Ствол</span><strong>Обзор данных</strong><span class="note">весь набор и план, откуда расходятся ветки</span></div>
-<div class="tree-side"><div class="scheme-card"><span>Побочная ветка</span><strong>Описание признаков</strong><span class="note">словарь столбцов, открывать по ходу обзора</span></div></div>
-<div class="tree-fork">
-<div class="scheme-card"><span>Спринт 1</span><strong>Акцепторы и доноры</strong><span class="note">разбор первой пары величин</span></div>
-<div class="scheme-card"><span>Спринт 2</span><strong>Генератор</strong><span class="note">ноутбука пока нет</span></div>
-</div>
-</div>
+GUIDE_INTRO = "<p>Ниже — схема и развёрнутое описание порядка просмотра.</p>"
+
+GUIDE_ROUTE = """
 <ol class="route">
 <li><div>
 <h3>Обзор данных</h3>
-<p>Общий ствол. Здесь все величины сразу: цели обзора, какие колонки экспериментальные, а какие посчитаны, очистка, распределения, выбросы и связи между величинами. В конце собран план дальнейших разборов и переход к генератору. Графики в середине можно листать быстрее. Итоги в конце лучше дочитать: без них обе ветки спринта начинаются без причины.</p>
+<p>Основа. Сначала целиком проходят выборку: что в ней лежит, как она приведена к рабочему виду, какие распределения и связи видны до детальных разборов. Здесь же фиксируют цели и намечают, какие ветки пойдут в спринты.</p>
 </div></li>
 <li><div>
 <h3>Описание признаков</h3>
-<p>Побочная ветка, не отдельный этап. Короткая таблица: имя столбца и обычными словами, что это за величина. В обзоре те же имена встречаются как <span class="code">cal_logp</span>, <span class="code">cal_pka_basic</span>, <span class="code">cal_h_bond_acceptor_count</span>. Страницу открывают рядом с обзором, когда имя в таблице мешает читать, и держат её под рукой.</p>
+<p>Дополнение. Короткая таблица: название признака и пояснение обычными словами. Открывать точечно, когда в тексте обзора непонятно, что за величина имеется в виду.</p>
 </div></li>
 <li><div>
-<h3>Спринт 1. Акцепторы и доноры</h3>
-<p>Первая основная ветка. Сейчас в ней один ноутбук. В нём две величины вместе: сколько мест в молекуле может принять водородную связь и сколько отдать. Ноутбук показывает, как они распределены, насколько связаны и что делать с редкими очень большими значениями. Сюда заходят после обзора: там видно, какое место эта пара занимает среди остальных признаков.</p>
+<h3>Спринт 1</h3>
+<p>Разбор выбранных пар величин уже после обзора, отдельный ноутбук на каждое направление.</p>
 </div></li>
 <li><div>
-<h3>Спринт 2. Генератор</h3>
-<p>Вторая основная ветка. По заданию из одной выбранной величины собирают генератор случайных чисел и сравнивают его с исходными данными. Пункт в меню уже есть, ноутбука в нём пока нет. Когда он появится, читается после обзора, рядом со спринтом 1, а не вместо него.</p>
+<h3>Спринт 2</h3>
+<p>Создание генераторов (на основе базового генератора)соответствующих случайных величин, рассмотренных в предыдущем спринте, и сравнение с тем, что было в исходной выборке; дальнейшие выводы по выполенной работе.</p>
+</div></li>
+<li><div>
+<h3>Визуализация генератора</h3>
+<p>Доп. ветка. Отдельный раздел визуализации генератора(-ов). Уместен после обзора и параллельно со спринтами, когда уже ясна общая картина.</p>
 </div></li>
 <li><div>
 <h3>Источники</h3>
-<p>«Материалы» — статьи и описания данных, на которые опирается работа. Список ещё пустой. Страница нужна, когда надо проверить, откуда взяты база, критерии и формулировки.</p>
+<p>Справка. Хз - мб ссылка на датасет или чет типо того.</p>
 </div></li>
 </ol>
 """
 
+GUIDE_SPRINT_NOTES = {
+    "Спринт 1": "Разбор выбранных пар величин после обзора",
+    "Спринт 2": "Генераторы случайных величин и сравнение с данными",
+}
+
+GUIDE_SPRINT_EXTRA = {
+    "Спринт 2": {
+        "heading": "Базовый генератор",
+        "author": AUTHORS["data_review.html"],
+        "file": "base_generator.py",
+        "note_suffix": "начальный заданный генератор для остальных",
+    },
+}
+
+GUIDE_SPRINT_LAYOUT = {
+    "Спринт 1": {
+        "left": 2,
+        "right": 2,
+        "bar": "thick",
+        "wide": True,
+        "stubs": True,
+        "leaf_notes": False,
+    },
+    "Спринт 2": {
+        "left": 2,
+        "right": 1,
+        "bar": "thick",
+        "wide": True,
+        "stubs": True,
+        "stubs_only": True,
+        "leaf_notes": False,
+    },
+}
+
+GUIDE_NOTEBOOK_NOTES = {
+    "data_review.html": "цели, очистка, распределения и план веток",
+    "features.html": "словарь столбцов, открывать по ходу обзора",
+    "materials.html": "статьи и описания, на которые опирается работа",
+    "hbond_simple.html": "акцепторы и доноры водородной связи вместе",
+    "logs_mw_ktvd.html": "растворимость и молекулярная масса в одном ноутбуке",
+    "generator_viz.html": "как устроен и визуализируется генератор",
+}
+
+
+def guide_notebook_lists():
+    s1 = [(href, title) for _src, title, href in SPRINTS[0][1]]
+    s2 = [(href, title) for _src, title, href in SPRINTS[1][1]]
+    extra_main = [(href, title) for _src, title, href in EXTRA_MENU_NOTEBOOKS]
+    return s1, s2, extra_main
+
+
+GUIDE_TRUNK_VBAR = (
+    '<span class="tree-v2-vbar tree-v2-vbar--thin tree-v2-vbar--trunk" '
+    'aria-hidden="true"></span>'
+)
+
+
+def guide_scheme_card(card_class, kicker="", title="", author="", note=""):
+    bits = ['<div class="scheme-card {}">'.format(card_class)]
+    if kicker:
+        bits.append('<span class="scheme-kicker">{kicker}</span>'.format(kicker=kicker))
+    if title:
+        bits.append("<strong>{title}</strong>".format(title=title))
+    if author:
+        bits.append('<span class="scheme-author">{author}</span>'.format(author=author))
+    if note:
+        bits.append('<span class="scheme-note">{note}</span>'.format(note=note))
+    bits.append("</div>")
+    return "".join(bits)
+
+
+def guide_leaf_card(href, title, *, show_note=True, stub=False):
+    if stub or not title:
+        return (
+            '<div class="scheme-card scheme-card--leaf scheme-card--leaf-tbd">'
+            '<span class="scheme-kicker">Ноутбук</span><strong>—</strong></div>'
+        )
+    note = GUIDE_NOTEBOOK_NOTES.get(href, "") if show_note else ""
+    return guide_scheme_card(
+        "scheme-card--leaf",
+        title=title,
+        author=AUTHORS.get(href, ""),
+        note=note,
+    )
+
+
+def guide_slot_lists(left_n, right_n, notebooks, layout):
+    items = list(notebooks)
+    if layout.get("stubs_only"):
+        items = []
+    left, right = [], []
+    fill_right_first = layout.get("fill_right_first")
+
+    def fill_side(target, count, index):
+        for _ in range(count):
+            if index[0] < len(items):
+                target.append(items[index[0]])
+                index[0] += 1
+            elif layout.get("stubs"):
+                target.append(("", ""))
+
+    index = [0]
+    if fill_right_first:
+        fill_side(right, right_n, index)
+        fill_side(left, left_n, index)
+    else:
+        fill_side(left, left_n, index)
+        fill_side(right, right_n, index)
+    return left, right
+
+
+def guide_leaf_row(side, href, title, layout):
+    thick = layout["bar"] == "thick"
+    bar_kind = "tree-v2-hbar--thick" if thick else "tree-v2-hbar--thin"
+    bar = '<span class="tree-v2-hbar {kind}" aria-hidden="true"></span>'.format(
+        kind=bar_kind
+    )
+    stub = not title
+    card = guide_leaf_card(
+        href,
+        title,
+        show_note=layout.get("leaf_notes", True),
+        stub=stub,
+    )
+    if side == "left":
+        return '<div class="tree-v2-leaf-row">{card}{bar}</div>'.format(card=card, bar=bar)
+    return '<div class="tree-v2-leaf-row">{bar}{card}</div>'.format(card=card, bar=bar)
+
+
+def guide_sprint_card(sprint_name, sprint_class):
+    bits = ['<div class="scheme-card {}">'.format(sprint_class)]
+    bits.append("<strong>{title}</strong>".format(title=sprint_name))
+    note = GUIDE_SPRINT_NOTES.get(sprint_name, "")
+    if note:
+        bits.append('<span class="scheme-note">{note}</span>'.format(note=note))
+    extra = GUIDE_SPRINT_EXTRA.get(sprint_name)
+    if extra:
+        bits.append('<div class="scheme-sprint-extra">')
+        bits.append("<strong>{heading}</strong>".format(heading=extra["heading"]))
+        if extra.get("author"):
+            bits.append(
+                '<span class="scheme-author">{author}</span>'.format(author=extra["author"])
+            )
+        if extra.get("file") and extra.get("note_suffix"):
+            bits.append(
+                '<span class="scheme-note">{file} - {suffix}</span>'.format(
+                    file=extra["file"],
+                    suffix=extra["note_suffix"],
+                )
+            )
+        elif extra.get("note"):
+            bits.append('<span class="scheme-note">{note}</span>'.format(note=extra["note"]))
+        bits.append("</div>")
+    bits.append("</div>")
+    return "".join(bits)
+
+
+def guide_sprint_block(sprint_name, notebooks, layout):
+    sprint_class = "scheme-card--sprint"
+    if layout.get("wide"):
+        sprint_class += " scheme-card--sprint-wide"
+    sprint_card = guide_sprint_card(sprint_name, sprint_class)
+    left, right = guide_slot_lists(
+        layout["left"], layout["right"], notebooks, layout
+    )
+    left_html = "\n".join(
+        guide_leaf_row("left", href, title, layout) for href, title in left
+    )
+    right_html = "\n".join(
+        guide_leaf_row("right", href, title, layout) for href, title in right
+    )
+    row_mod = " tree-v2-sprint-row--wide" if layout.get("wide") else ""
+    return """
+<div class="tree-v2-sprint">
+  <div class="tree-v2-sprint-row{row_mod}">
+    <div class="tree-v2-leaves tree-v2-leaves--left">{left}</div>
+    <div class="tree-v2-sprint-mid">{sprint}</div>
+    <div class="tree-v2-leaves tree-v2-leaves--right">{right}</div>
+  </div>
+</div>""".format(
+        row_mod=row_mod,
+        left=left_html,
+        right=right_html,
+        sprint=sprint_card,
+    )
+
+
+def guide_tree_html():
+    main_href = DATA_NOTEBOOKS[0][2]
+    s1_notebooks, s2_notebooks, extra_main = guide_notebook_lists()
+    parts = [
+        '<div class="tree-v2">',
+        '<div class="tree-v2-root">',
+        '<div class="tree-v2-side tree-v2-side--left">',
+        guide_scheme_card(
+            "scheme-card--ghost scheme-card--minor scheme-card--sources-compact",
+            title="Источники",
+        ),
+        '<span class="tree-v2-hbar tree-v2-hbar--thin tree-v2-hbar--muted" aria-hidden="true"></span>',
+        "</div>",
+        guide_scheme_card(
+            "scheme-card--main",
+            kicker="Основа",
+            title="Обзор данных",
+            author=AUTHORS.get(main_href, ""),
+            note="Ознакомление, отчистка, распределения, цели и планы веток",
+        ),
+        '<div class="tree-v2-side tree-v2-side--right">',
+        '<span class="tree-v2-hbar tree-v2-hbar--thin tree-v2-hbar--dash" aria-hidden="true"></span>',
+        guide_scheme_card(
+            "scheme-card--side",
+            kicker="Дополнение",
+            title="Описание признаков",
+            author=AUTHORS.get("features.html", ""),
+            note="Доп. информация по исследуемым признакам",
+        ),
+        "</div>",
+        "</div>",
+        GUIDE_TRUNK_VBAR,
+    ]
+    for sprint_name, sprint_notebooks in [
+        (SPRINTS[0][0], s1_notebooks),
+        (SPRINTS[1][0], s2_notebooks),
+    ]:
+        layout = GUIDE_SPRINT_LAYOUT[sprint_name]
+        parts.append(guide_sprint_block(sprint_name, sprint_notebooks, layout))
+        parts.append(GUIDE_TRUNK_VBAR)
+    if parts[-1] == GUIDE_TRUNK_VBAR:
+        parts.pop()
+    for href, title in extra_main:
+        parts.append(GUIDE_TRUNK_VBAR)
+        parts.append('<div class="tree-v2-trunk-node">')
+        parts.append(
+            guide_scheme_card(
+                "scheme-card--main",
+                kicker="Доп. ветка",
+                title="Визуализация генератора",
+                author=AUTHORS.get(href, ""),
+            )
+        )
+        parts.append("</div>")
+    parts.append("</div>")
+    return "\n".join(parts)
+
+
+def guide_html():
+    return GUIDE_INTRO + guide_tree_html() + GUIDE_ROUTE
+
+
 KICKER = "Лабораторная работа 01"
 TITLE = "Инфохимия. Статистический анализ свойств молекул"
 INTRO = """
-<p>В DrugBank собраны лекарственные вещества и их свойства. Для этой работы из базы взяты уже посчитанные характеристики молекул: размер, растворимость, способность отдавать и принимать водородную связь, кислотность и несколько признаков того, насколько вещество похоже на лекарство. Каждая характеристика встречается у тысяч молекул, поэтому её смотрят как случайную величину. У неё есть центр, разброс, редкие значения и соседи, вместе с которыми она меняется.</p>
-<p>Работа делится на два спринта. В первом нужно понять набор целиком и проверить, как связаны отдельные величины. Во втором из одной выбранной величины собирают генератор случайных чисел и сравнивают его с исходными данными. Сейчас на сайте готовы обзор всего набора и первый подробный разбор: акцепторы и доноры водородной связи. Генератор появится в спринте 2.</p>
-<p>Здесь нет расчётов. Страница объясняет, зачем остальные вкладки и в каком порядке их открывать. В ноутбуках расчёт спрятан под пункт «Код»: для чтения достаточно текста, графиков и выводов. Слева меню по всей работе. Справа заголовки той страницы, которая открыта. На страницах со словарём и источниками правого списка нет: там один блок, и оглавление было бы лишним.</p>
+<p><strong>Этот репозиторий и сайт</strong> Материалы лабораторной по инфохимии: статистический анализ свойств молекул на реальных данных. Здесь собраны очищенный датасет, ноутбуки с расчётами, выводами и графиками, а также страницы для чтения без запуска кода. Задача работы — рассмотреть числовые характеристики веществ как случайные величины: оценить распределения, связи, выборки и гипотезы, а затем перейти к моделированию.</p>
+<p><strong>Исходные данные</strong> Выборка из базы DrugBank: лекарственные соединения и заранее посчитанные для них дескрипторы (молекулярные признаки). После очистки от экспериментальных признаков и служебных полей остаются тысячи строк; каждая строка — одна молекула, каждый столбец — одна числовая (или категориальная) характеристика, пригодная для статистики. Именно с этим набором команда выполняет последующую работу.</p>
+<p><strong>Спринт 1 — анализ</strong> Сначала идёт обзор всего датасета: пропуски, распределения, корреляции, план дальнейших разборов. Затем в отдельных ноутбуках команда разбирает выбранные пары признаков по единому плану: обосновывает стохастику (случайность), проверяет зависимости, выполняет анализ и формулирует итоги.</p>
+<p><strong>Спринт 2 — генератор</strong> Команда реализует генераторы случайных величин по эмпирическим или теоретическим распределениям данных первого спринта: у каждого свой метод, общий интерфейс (BaseGenerator, инициализация по данным), сравнение с исходным распределением на графиках и по статистикам, статистические тесты и выводы о качестве.</p>
+<p>Главная страница расчётов не содержит: она объясняет устройство работы и порядок чтения. В ноутбуках код свёрнут под пунктом «Код», графики под пунктом «Графики». Слева — меню по всей работе, справа — оглавление открытой страницы.</p>
 """
 
 CHEMIST = (
@@ -93,9 +357,9 @@ TEAM = """
 <p class="role">Руководил командой: составил план выполнения работы, подобрал начальные данные, с которыми шла дальнейшая работа, и отдал остальным сокомандникам индивидуальные задания. {chemist}</p>
 </td>
 <td rowspan="4">
-<p class="who">Закликовский Иван<span class="isu">503803</span><span class="roles">дизайнер | (возможно разработчик и исследователь)</span></p>
-<p class="files">&lt;пока нет&gt;</p>
-<p class="role">Собрал и оформил этот сайт, оформил ноутбуки команды и переформулировал тексты. Возможно, тоже участвует в исследовании.</p>
+<p class="who">Закликовский Иван<span class="isu">503803</span><span class="roles">дизайнер | разработчик | исследователь</span></p>
+<p class="files">Растворимость и молекулярная масса</p>
+<p class="role">Собрал и оформил этот сайт, оформил ноутбуки команды и переформулировал тексты. {chemist}</p>
 </td>
 </tr>
 <tr>
@@ -122,6 +386,42 @@ TEAM = """
 </tbody>
 </table>
 """.format(chemist=CHEMIST)
+
+CAT_MARK_TABLE = """
+<h3 class="cat-mark-title">Таблица</h3>
+<table class="cat-mark-table">
+<thead>
+<tr><th>cat_id</th><th>notebook_link</th><th>coeff</th><th>comment</th></tr>
+</thead>
+<tbody>
+<tr>
+<td>lab.ic.01 Сычев Александр 467653</td>
+<td><a href="data_review.html">Обзор данных</a><br><a href="features.html">Описание признаков</a></td>
+<td>—</td><td>?</td>
+</tr>
+<tr>
+<td>lab.ic.01 Петрунина Анна 327017</td>
+<td><a href="hbond_simple.html">Акцепторы и доноры</a></td>
+<td>—</td><td>?</td>
+</tr>
+<tr>
+<td>lab.ic.01 Родичева Варвара 502343</td>
+<td>—</td>
+<td>—</td><td>?</td>
+</tr>
+<tr>
+<td>lab.ic.01 Авсиевич Евдокия 464929</td>
+<td>—</td>
+<td>—</td><td>?</td>
+</tr>
+<tr>
+<td>lab.de.01 Закликовский Иван 503803</td>
+<td><a href="logs_mw_ktvd.html">Растворимость и молекулярная масса</a><br><a href="generator_viz.html">Визуализация генератора</a></td>
+<td>—</td><td>?</td>
+</tr>
+</tbody>
+</table>
+"""
 
 PAGE_STYLE = """
 <style>
@@ -232,11 +532,33 @@ body { margin: 0; font-family: sans-serif; color: var(--text); background: var(-
     border-radius: 8px;
 }
 .sidebar-box > a,
-.sidebar-box > details { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+.sidebar-box > details {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
 .sidebar-box > a,
-.sidebar-box > details > summary { display: block; padding: 0.8rem 1rem; border-radius: 6px; }
-.sidebar-box > a:hover,
-.sidebar-box > details > summary:hover { background: var(--hover); }
+.sidebar-box > details > summary {
+    display: block;
+    padding: 0.8rem 1rem;
+    border-radius: 6px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+.sidebar-nav-section .sidebar-nav-panel {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.48s ease, opacity 0.4s ease;
+}
+.sidebar-nav-section.is-open:not(.is-retracting) .sidebar-nav-panel {
+    max-height: 32rem;
+    opacity: 1;
+}
+.sidebar-nav-section.is-retracting .sidebar-nav-panel {
+    max-height: 0;
+    opacity: 0;
+}
 .sidebar details details { margin: 0.65rem 0.6rem; background: var(--surface-2); border: 1px solid var(--line-faint); border-radius: 6px; }
 .sidebar details details > summary { display: block; padding: 0; border-radius: 6px; }
 .sidebar details details > summary a { display: block; padding: 0.6rem 0.75rem; border-radius: 6px; }
@@ -255,34 +577,345 @@ body { margin: 0; font-family: sans-serif; color: var(--text); background: var(-
 .toc-pop .open-notebook { display: block; padding: 0.35rem 0.6rem; }
 .sidebar .toc { margin: 0.2rem 0 0.4rem 1rem; padding: 0; list-style: none; }
 .sidebar .empty { margin: 0.2rem 0.6rem 0.6rem; color: var(--muted-2); font-size: 0.9rem; }
-.page-toc { left: auto; right: 1rem; }
-.page-toc .sidebar-box { gap: 0.4rem; padding: 0.45rem; overscroll-behavior: contain; }
-.page-toc .sidebar-box > a { display: block; padding: 0.45rem 0.7rem; border-radius: 6px; font-size: 0.92rem; line-height: 1.3; }
-.page-toc .sidebar-box > a:hover { background: var(--hover); }
-.page-toc .sidebar-box > a.is-current,
-.page-toc .sidebar-box > a.is-current:hover { background: var(--current); }
+.sidebar.page-toc {
+    left: auto;
+    right: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.55rem;
+}
+.page-toc .sidebar-box.page-toc-box {
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 0.55rem;
+    padding: 0.45rem;
+    overscroll-behavior: contain;
+}
+.page-toc .sidebar-box.feature-lookup-box {
+    flex: 0 0 auto;
+    padding: 0;
+    border: none;
+    background: transparent;
+    overflow: visible;
+}
+.page-toc-scroll {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+}
+.page-toc .page-toc-scroll > a {
+    display: block;
+    padding: 0.45rem 0.7rem;
+    border-radius: 6px;
+    font-size: 0.92rem;
+    line-height: 1.3;
+    border: 1px solid var(--line-faint);
+    background: var(--surface-2);
+}
+.page-toc .page-toc-scroll > a:hover { background: var(--hover); }
+.page-toc .page-toc-scroll > a.is-current,
+.page-toc .page-toc-scroll > a.is-current:hover {
+    border-color: var(--heading);
+    color: var(--heading);
+    background: var(--accent-bg);
+}
+.feature-lookup-field {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+    border: 1px solid var(--line-faint);
+    border-radius: 6px;
+    background: var(--surface-2);
+    overflow: hidden;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+.feature-lookup-field.is-match {
+    border-color: var(--heading);
+}
+.feature-lookup-field.is-invalid { border-color: #c55; }
+.feature-lookup-search {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0 0.55rem 0 0.65rem;
+    min-height: 2.35rem;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+.feature-lookup-field.is-match .feature-lookup-search {
+    color: var(--heading);
+    background: var(--accent-bg);
+}
+.feature-lookup-icon {
+    flex: 0 0 auto;
+    display: flex;
+    width: 1.05rem;
+    height: 1.05rem;
+    color: var(--muted-2);
+}
+.feature-lookup-field.is-match .feature-lookup-icon { color: var(--heading); }
+.feature-lookup-icon svg { display: block; width: 100%; height: 100%; }
+.feature-lookup-input {
+    display: block;
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 0.45rem 0.65rem 0.45rem 0;
+    border: 0;
+    border-radius: 0;
+    font: inherit;
+    font-size: 0.92rem;
+    line-height: 1.3;
+    color: var(--text);
+    background: transparent;
+    transition: color 0.15s ease;
+}
+.feature-lookup-field.is-match .feature-lookup-input { color: var(--heading); }
+.feature-lookup-input:focus { outline: none; }
+.feature-lookup-input::placeholder { color: var(--muted-2); }
+.feature-lookup-result {
+    padding: 0.5rem 0.7rem 0.65rem;
+    border-top: 1px solid var(--line-soft);
+    font-size: 0.84rem;
+    line-height: 1.4;
+}
+.feature-lookup-desc { margin: 0 0 0.35rem; color: var(--text); }
+.feature-lookup-kind { margin: 0; color: var(--muted-2); font-size: 0.8rem; }
+.feature-lookup-miss { margin: 0; color: var(--muted-2); }
 .prose p { margin: 0 0 0.85rem; font-size: 1.05rem; line-height: 1.6; }
 .prose p:last-child { margin-bottom: 0; }
-.tree { display: flex; flex-direction: column; align-items: center; margin: 2.6rem 0 2.4rem; }
-.scheme-card { display: flex; flex-direction: column; align-items: flex-start; gap: 0.28rem; width: 100%; min-height: 14rem; padding: 0.85rem 0.95rem; background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; box-sizing: border-box; }
-.scheme-card span { color: var(--muted); font-size: 0.86rem; }
-.scheme-card strong { font-size: 1rem; line-height: 1.3; }
-.scheme-card .note { line-height: 1.35; }
-.tree-root { position: relative; width: min(100%, 24rem); z-index: 1; }
-.tree-root::after { content: ""; position: absolute; left: 50%; top: 100%; height: 1.4rem; border-left: 1px solid var(--scheme-line); }
-.tree-side { position: relative; width: 100%; margin-top: 1.4rem; padding-left: calc(50% + 1.35rem); box-sizing: border-box; }
-.tree-side::before { content: ""; position: absolute; left: 50%; top: 0; height: calc(100% + 8rem + 1.7rem); border-left: 1px solid var(--scheme-line); }
-.tree-side .scheme-card { position: relative; z-index: 1; width: 100%; max-width: 20rem; }
-.tree-side .scheme-card::before { content: ""; position: absolute; right: 100%; top: 50%; width: 1.35rem; border-top: 1px dashed var(--scheme-dash); }
-.tree-fork { display: flex; justify-content: center; align-items: stretch; gap: 3.2rem; width: 100%; margin-top: 8rem; }
-.tree-fork .scheme-card { position: relative; z-index: 1; width: min(17.5rem, calc(50% - 1.6rem)); }
-.tree-fork .scheme-card:first-child::after { content: ""; position: absolute; left: 100%; top: 1.7rem; width: 1.6rem; border-top: 1px solid var(--scheme-line); }
-.tree-fork .scheme-card:last-child::before { content: ""; position: absolute; right: 100%; top: 1.7rem; width: 1.6rem; border-top: 1px solid var(--scheme-line); }
+.prose-intro { font-size: 1.02rem; line-height: 1.72; }
+.prose-intro p { margin: 0 0 1.45rem; }
+.prose-intro p:last-child {
+    margin-top: 0.5rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--line-soft);
+    font-size: 0.94rem;
+    line-height: 1.62;
+    color: var(--muted);
+}
+.prose-intro p > strong {
+    display: block;
+    margin-bottom: 0.45rem;
+    font-size: 1.14rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--heading);
+    letter-spacing: 0.01em;
+}
+.prose-intro p:first-child > strong { font-size: 1.18rem; }
+.prose-intro p:first-child {
+    font-size: 1.06rem;
+    line-height: 1.75;
+}
+.panel#vvedenie h2 {
+    margin-bottom: 1.15rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--line-soft);
+}
+.scheme-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.28rem;
+    width: 100%;
+    max-width: 17.5rem;
+    padding: 0.85rem 0.95rem;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+.scheme-card strong { font-size: 1rem; line-height: 1.3; font-weight: 600; }
+.scheme-kicker { color: var(--muted); font-size: 0.86rem; }
+.scheme-author { color: var(--muted-2); font-size: 0.78rem; line-height: 1.3; }
+.scheme-note { color: var(--muted); font-size: 0.84rem; line-height: 1.35; }
+.tree-v2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 2.2rem 0 2.4rem;
+    --tree-thick: 9px;
+    --tree-arm: 2.35rem;
+    --tree-arm-wide: 1.88rem;
+    --tree-card: 16.75rem;
+    --tree-card-leaf: 13.96rem;
+}
+.tree-v2 .scheme-card--leaf {
+    width: var(--tree-card-leaf);
+    max-width: var(--tree-card-leaf);
+    padding: 0.72rem 0.8rem;
+    box-sizing: border-box;
+}
+.tree-v2 .scheme-card--leaf strong { font-size: 0.92rem; }
+.tree-v2 .scheme-card--leaf .scheme-author { font-size: 0.72rem; }
+.tree-v2-root { --tree-arm: 3.65rem; }
+.tree-v2-root .scheme-card {
+    width: var(--tree-card);
+    max-width: var(--tree-card);
+    box-sizing: border-box;
+}
+.tree-v2-root {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0;
+    column-gap: 0.25rem;
+    width: min(100%, 52rem);
+}
+.tree-v2-sprint-mid .scheme-card--sprint-wide {
+    width: var(--tree-card);
+    max-width: var(--tree-card);
+    min-width: var(--tree-card);
+    min-height: 9.75rem;
+    padding: 0.95rem 0.95rem 1.05rem;
+    justify-content: flex-start;
+    align-items: flex-start;
+    box-sizing: border-box;
+}
+.tree-v2-sprint-mid .scheme-card--sprint-wide .scheme-note { line-height: 1.35; }
+.scheme-sprint-extra {
+    width: 100%;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--line-soft);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.28rem;
+}
+.scheme-sprint-extra strong { font-size: 0.96rem; }
+.tree-v2-side { display: flex; align-items: center; gap: 0; min-width: 0; }
+.tree-v2-side--left { justify-content: flex-end; }
+.tree-v2-side--right { justify-content: flex-start; }
+.tree-v2-hbar--thin {
+    display: block;
+    width: var(--tree-arm);
+    height: 0;
+    flex: 0 0 var(--tree-arm);
+    border-top: 1px solid var(--scheme-line);
+    background: none;
+}
+.tree-v2-hbar--thick {
+    display: block;
+    width: var(--tree-arm);
+    height: var(--tree-thick);
+    flex: 0 0 var(--tree-arm);
+    background: var(--heading);
+    border-radius: 2px;
+    align-self: center;
+}
+.tree-v2-hbar--dash { border-top-style: dashed; border-top-color: var(--scheme-dash); }
+.tree-v2-hbar--muted { border-top-color: var(--line); }
+.tree-v2-vbar--thin {
+    display: block;
+    width: 0;
+    height: 1.6rem;
+    margin: 0.2rem auto;
+    border-left: 1px solid var(--scheme-line);
+}
+.tree-v2-vbar--trunk {
+    height: 8rem;
+    margin: 0 auto;
+    flex-shrink: 0;
+}
+.tree-v2-trunk-node {
+    display: flex;
+    justify-content: center;
+    width: min(100%, 58rem);
+}
+.tree-v2-trunk-node .scheme-card {
+    width: var(--tree-card);
+    max-width: var(--tree-card);
+}
+.tree-v2-sprint {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: min(100%, 58rem);
+}
+.tree-v2-sprint-row {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: center;
+    gap: 0;
+    width: 100%;
+    --tree-arm: var(--tree-arm-wide);
+}
+.tree-v2-sprint-row--wide { width: min(100%, 58rem); }
+.tree-v2-sprint-mid {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    flex: 0 0 auto;
+    align-self: stretch;
+}
+.tree-v2-sprint-mid .scheme-card--sprint-wide {
+    flex: 1 1 auto;
+    align-self: stretch;
+    height: 100%;
+}
+.tree-v2-leaves {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 0.35rem 0;
+    flex: 0 0 auto;
+    align-self: center;
+}
+.scheme-card--leaf-tbd {
+    border-color: var(--line-faint);
+    border-style: dashed;
+    opacity: 0.7;
+}
+.scheme-card--leaf-tbd strong { color: var(--muted-2); font-weight: 500; }
+.tree-v2-leaves--left { align-items: flex-end; padding-right: 0; }
+.tree-v2-leaves--right { align-items: flex-start; padding-left: 0; }
+.tree-v2-leaf-row { display: flex; align-items: center; gap: 0; }
+.scheme-card--main,
+.scheme-card--sprint,
+.scheme-card--leaf { border-color: var(--heading); }
+.scheme-card--side {
+    border-color: var(--muted);
+    background: var(--surface);
+    color: var(--muted-2);
+}
+.scheme-card--side strong { color: var(--text); font-weight: 500; }
+.scheme-card--ghost.scheme-card--minor {
+    border-color: var(--line-faint);
+    background: transparent;
+    color: var(--muted-2);
+    opacity: 0.92;
+}
+.scheme-card--ghost.scheme-card--minor strong {
+    color: var(--muted-2);
+    font-weight: 500;
+    font-size: 0.88rem;
+}
+.tree-v2-root .scheme-card--sources-compact {
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    padding: 0.5rem 0.7rem;
+    gap: 0;
+}
+.tree-v2-root .scheme-card--sources-compact strong {
+    font-size: 0.92rem;
+}
 .route { list-style: none; margin: 0; padding: 0; counter-reset: stop; }
 .route > li { display: grid; grid-template-columns: 2.3rem 1fr; gap: 0.75rem; padding: 0.95rem 0; border-top: 1px solid var(--line-soft); }
 .route > li::before { counter-increment: stop; content: counter(stop); width: 2.3rem; height: 2.3rem; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); font-weight: 600; }
 .route h3 { margin: 0.15rem 0 0.35rem; font-size: 1.05rem; }
 .route p { margin: 0; line-height: 1.55; }
+.route p.route-sub { margin-top: 0.55rem; color: var(--muted); font-size: 0.98rem; }
 .code { font-family: monospace; font-size: 0.92em; }
 .content { margin-left: 22rem; margin-right: 22rem; min-width: 0; padding: 1.5rem 1rem 3rem 1rem; }
 .panel { width: 100%; padding: 1.3rem 1.5rem; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; box-sizing: border-box; }
@@ -300,26 +933,32 @@ h1, h2, h3, h4, h5, h6,
 .jp-RenderedHTMLCommon h4,
 .jp-RenderedHTMLCommon h5,
 .jp-RenderedHTMLCommon h6 { color: var(--heading); }
-.scheme-card { border-color: var(--heading); }
 .route > li::before { color: var(--heading); border-color: var(--heading); }
 .team th,
 .team .roles { color: var(--heading); }
 .sidebar:not(.page-toc) .sidebar-box > a:hover,
+.sidebar:not(.page-toc) .sidebar-box > a.is-current,
+.sidebar:not(.page-toc) .sidebar-box > a.is-current:hover {
+    color: var(--heading);
+    border-color: var(--heading);
+    background: var(--accent-bg);
+}
+.sidebar:not(.page-toc) .sidebar-box > details:has(> summary:hover) {
+    border-color: var(--heading);
+    background: var(--accent-bg);
+}
+.sidebar:not(.page-toc) .sidebar-box > details > summary:hover {
+    color: var(--heading);
+    background: var(--accent-bg);
+}
 .sidebar:not(.page-toc) .notebook-link:hover,
 .sidebar:not(.page-toc) details details > summary a:hover {
     color: var(--heading);
     border-color: var(--heading);
     background: var(--accent-bg);
 }
-.sidebar:not(.page-toc) .sidebar-box > details:hover { border-color: var(--heading); }
-.sidebar:not(.page-toc) .sidebar-box > details > summary:hover {
-    color: var(--heading);
-    background: var(--accent-bg);
-}
-.page-toc .sidebar-box > a.is-current,
-.page-toc .sidebar-box > a.is-current:hover,
-.sidebar:not(.page-toc) .sidebar-box > a.is-current,
-.sidebar:not(.page-toc) .sidebar-box > a.is-current:hover,
+.page-toc .page-toc-scroll > a.is-current,
+.page-toc .page-toc-scroll > a.is-current:hover,
 .sidebar:not(.page-toc) .notebook-link.is-current,
 .sidebar:not(.page-toc) .notebook-link.is-current:hover {
     color: var(--heading);
@@ -336,7 +975,13 @@ h1, h2, h3, h4, h5, h6,
 }
 .team .files { margin: 0.35rem 0 0; color: var(--muted-2); font-size: 0.86rem; }
 .team .role { margin: 0.55rem 0 0; line-height: 1.5; }
-.lead { margin: 0; font-size: 1.05rem; line-height: 1.55; }
+.cat-mark-title {
+    margin: 1.75rem 0 0.65rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--heading);
+}
+.cat-mark-table { margin-top: 0; }
 .panel table { width: 100%; border-collapse: collapse; margin-top: 0.4rem; }
 .panel th, .panel td { padding: 0.55rem 0.7rem; border: 1px solid var(--line); text-align: left; vertical-align: top; }
 .panel th { background: var(--table-head); }
@@ -438,6 +1083,19 @@ body.jp-Notebook .table-sheet table.dataframe thead th { background: var(--table
     font-weight: 400;
     line-height: 1.3;
 }
+.sidebar:not(.page-toc) .byline-reveal .byline {
+    margin-top: 0;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: opacity 0.15s ease, max-height 0.15s ease, margin-top 0.15s ease;
+}
+.sidebar:not(.page-toc) .byline-reveal:hover .byline,
+.sidebar:not(.page-toc) .byline-reveal.is-current .byline {
+    max-height: 2.5rem;
+    opacity: 1;
+    margin-top: 0.18rem;
+}
 body.jp-Notebook { background: var(--bg); color: var(--text); }
 body.jp-Notebook main {
     display: block;
@@ -530,6 +1188,35 @@ document.addEventListener("DOMContentLoaded", function () {
         var href = (link.getAttribute("href") || "").split("#")[0].split("?")[0];
         if (href.split("/").pop() === pageName) link.classList.add("is-current");
     });
+    var navBox = aside.querySelector(".sidebar-box");
+    var NAV_CLOSE_MS = 520;
+    if (navBox) {
+        Array.prototype.forEach.call(navBox.children, function (node) {
+            if (node.tagName !== "DETAILS" || !node.classList.contains("sidebar-nav-section")) {
+                return;
+            }
+            function sectionHasCurrent() {
+                return !!node.querySelector(".is-current");
+            }
+            node.open = true;
+            if (sectionHasCurrent()) node.classList.add("is-open");
+            var summary = node.querySelector("summary");
+            if (!summary) return;
+            summary.addEventListener("click", function (e) {
+                e.preventDefault();
+                if (node.classList.contains("is-open")) {
+                    node.classList.add("is-retracting");
+                    clearTimeout(node._navCloseTimer);
+                    node._navCloseTimer = setTimeout(function () {
+                        node.classList.remove("is-open", "is-retracting");
+                    }, NAV_CLOSE_MS);
+                    return;
+                }
+                node.classList.remove("is-retracting");
+                node.classList.add("is-open");
+            });
+        });
+    }
     content.className = "content";
     while (document.body.firstChild) {
         content.appendChild(document.body.firstChild);
@@ -570,23 +1257,94 @@ document.addEventListener("DOMContentLoaded", function () {
         sheet.appendChild(table);
     });
 
+    function buildFeatureLookup(glossary, host) {
+        var field = document.createElement("div");
+        field.className = "feature-lookup-field";
+        var searchRow = document.createElement("div");
+        searchRow.className = "feature-lookup-search";
+        var icon = document.createElement("span");
+        icon.className = "feature-lookup-icon";
+        icon.setAttribute("aria-hidden", "true");
+        icon.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="M16 16l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>';
+        var input = document.createElement("input");
+        input.type = "text";
+        input.className = "feature-lookup-input";
+        input.setAttribute("autocomplete", "off");
+        input.setAttribute("spellcheck", "false");
+        input.placeholder = "Признак из таблицы (cal_logs)";
+        var result = document.createElement("div");
+        result.className = "feature-lookup-result";
+        result.hidden = true;
+        searchRow.appendChild(icon);
+        searchRow.appendChild(input);
+        field.appendChild(searchRow);
+        field.appendChild(result);
+        host.appendChild(field);
+
+        var byLower = {};
+        Object.keys(glossary).forEach(function (key) {
+            byLower[key.toLowerCase()] = key;
+        });
+
+        function apply() {
+            var raw = input.value.trim();
+            field.classList.remove("is-match", "is-invalid");
+            if (!raw) {
+                result.hidden = true;
+                result.textContent = "";
+                return;
+            }
+            var key = byLower[raw.toLowerCase()];
+            if (!key) {
+                result.hidden = false;
+                field.classList.add("is-invalid");
+                result.innerHTML = '<p class="feature-lookup-miss">Нет такого признака в таблице</p>';
+                return;
+            }
+            var item = glossary[key];
+            field.classList.add("is-match");
+            result.hidden = false;
+            result.innerHTML =
+                '<p class="feature-lookup-desc">' + item.description + "</p>"
+                + '<p class="feature-lookup-kind">' + item.kind + "</p>";
+        }
+
+        input.addEventListener("change", apply);
+        input.addEventListener("blur", apply);
+        input.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                apply();
+            }
+        });
+    }
+
     if (page.sections && page.sections.length) {
         var right = document.createElement("aside");
         var box = document.createElement("div");
+        var scroll = document.createElement("div");
         right.className = "sidebar page-toc";
-        box.className = "sidebar-box";
+        box.className = "sidebar-box page-toc-box";
+        scroll.className = "page-toc-scroll";
         page.sections.forEach(function (section) {
             var link = document.createElement("a");
             link.href = section.href;
             link.textContent = section.title;
-            box.appendChild(link);
+            scroll.appendChild(link);
         });
+        box.appendChild(scroll);
         right.appendChild(box);
+        if (page.featureLookup && page.featureGlossary && Object.keys(page.featureGlossary).length) {
+            var lookupBox = document.createElement("div");
+            lookupBox.className = "sidebar-box feature-lookup-box";
+            buildFeatureLookup(page.featureGlossary, lookupBox);
+            right.appendChild(lookupBox);
+        }
         document.body.appendChild(right);
     }
 
     var sidebars = document.querySelectorAll(".sidebar");
-    var tocBox = document.querySelector(".page-toc .sidebar-box");
+    var tocBox = document.querySelector(".page-toc-scroll");
     var tocLinks = tocBox ? tocBox.querySelectorAll("a") : [];
     var headings = [];
     tocLinks.forEach(function (link) {
@@ -633,12 +1391,17 @@ document.addEventListener("DOMContentLoaded", function () {
         var rest = restingTop();
         var top = rest - Math.min(window.scrollY, limit);
         sidebars.forEach(function (sidebar) {
-            sidebar.style.top = top + "px";
+            var lift = sidebar.classList.contains("page-toc") ? 80 : 0;
+            sidebar.style.top = (top - lift) + "px";
         });
         var room = window.innerHeight - 2 * rest + 128;
         var maxFit = window.innerHeight - (rest - limit) - 16;
         var maxHeight = Math.max(160, Math.min(room, maxFit)) + "px";
         document.querySelectorAll(".sidebar-box").forEach(function (box) {
+            if (box.classList.contains("feature-lookup-box")) {
+                box.style.maxHeight = "";
+                return;
+            }
             box.style.maxHeight = maxHeight;
         });
         markCurrent();
@@ -678,8 +1441,14 @@ document.addEventListener("DOMContentLoaded", function () {
 """
 
 
-def notebook_toc(notebook_path):
+def read_notebook(notebook_path):
     notebook = nbformat.read(notebook_path, as_version=4)
+    _changes, notebook = nbformat.validator.normalize(notebook)
+    return notebook
+
+
+def notebook_toc(notebook_path):
+    notebook = read_notebook(notebook_path)
     items = []
     pending_id = None
     for cell in notebook.cells:
@@ -720,10 +1489,11 @@ def toc_html(items, page_name):
     return "\n".join(lines)
 
 
-def file_link(href, title, link_class=""):
+def file_link(href, title, link_class="", byline_reveal=False):
     author = AUTHORS.get(href, "")
     byline = '<span class="byline">{author}</span>'.format(author=author) if author else ""
-    class_attr = ' class="{}"'.format(link_class) if link_class else ""
+    classes = [c for c in (link_class, "byline-reveal" if byline_reveal else "") if c]
+    class_attr = ' class="{}"'.format(" ".join(classes)) if classes else ""
     return '<a{class_attr} href="{href}">{title}{byline}</a>'.format(
         class_attr=class_attr,
         href=href,
@@ -732,39 +1502,55 @@ def file_link(href, title, link_class=""):
     )
 
 
+def feature_glossary():
+    text = FEATURES_PATH.read_text(encoding="utf-8")
+    glossary = {}
+    pattern = re.compile(
+        r"<tr><td>([^<]+)</td><td>([^<]+)</td><td>([^<]+)</td></tr>"
+    )
+    for name, description, kind in pattern.findall(text):
+        glossary[name.strip()] = {
+            "description": description.strip(),
+            "kind": kind.strip(),
+        }
+    return glossary
+
+
 def sidebar_html():
     parts = ['<a href="index.html">О работе</a>']
-    parts.append("<details><summary>Данные</summary>")
+    parts.append('<details class="sidebar-nav-section" open><summary>Данные</summary>')
+    parts.append('<div class="sidebar-nav-panel">')
     for _source, title, file_name in DATA_NOTEBOOKS:
         parts.append(file_link(file_name, title, "notebook-link"))
-    parts.append(
-        "<details><summary>{link}</summary></details>".format(
-            link=file_link("features.html", "Описание признаков")
-        )
-    )
-    parts.append("</details>")
+    parts.append(file_link("features.html", "Описание признаков", "notebook-link"))
+    parts.append("</div></details>")
     for sprint_name, notebooks in SPRINTS:
-        parts.append("<details><summary>{name}</summary>".format(name=sprint_name))
+        parts.append(
+            '<details class="sidebar-nav-section" open><summary>{name}</summary>'.format(
+                name=sprint_name
+            )
+        )
+        parts.append('<div class="sidebar-nav-panel">')
         if not notebooks:
             parts.append('<p class="empty">Ноутбуков пока нет</p>')
         for _source, title, file_name in notebooks:
             parts.append(file_link(file_name, title, "notebook-link"))
-        parts.append("</details>")
-    parts.append("<details><summary>Материалы</summary>")
-    parts.append(
-        '<details><summary><a href="materials.html">Источники</a></summary></details>'
-    )
-    parts.append("</details>")
+        parts.append("</div></details>")
+    for _source, title, file_name in EXTRA_MENU_NOTEBOOKS:
+        parts.append(file_link(file_name, title, byline_reveal=True))
+    parts.append(file_link("materials.html", "Источники"))
     return '<div class="sidebar-box">\n' + "\n".join(parts) + "\n</div>"
 
 
-def chrome(html, sections):
+def chrome(html, sections, *, feature_lookup=True):
     payload = json.dumps(
         {
             "kicker": KICKER,
             "title": TITLE,
             "sidebar": sidebar_html(),
             "sections": sections,
+            "featureLookup": feature_lookup,
+            "featureGlossary": feature_glossary() if feature_lookup else {},
         },
         ensure_ascii=False,
     )
@@ -784,7 +1570,7 @@ def chrome(html, sections):
 
 
 def notebook_to_html(notebook_path):
-    notebook = nbformat.read(notebook_path, as_version=4)
+    notebook = read_notebook(notebook_path)
     exporter = HTMLExporter()
     exporter.template_name = "classic"
     exporter.exclude_input_prompt = True
@@ -793,7 +1579,7 @@ def notebook_to_html(notebook_path):
     return html
 
 
-def write_simple_page(file_name, body, sections):
+def write_simple_page(file_name, body, sections, *, feature_lookup=True):
     page = Template(
         """<!DOCTYPE html>
 <html lang="ru">
@@ -807,7 +1593,10 @@ $body
 </html>
 """
     ).substitute(title=TITLE, body=body)
-    (OUTPUT_DIR / file_name).write_text(chrome(page, sections), encoding="utf-8")
+    (OUTPUT_DIR / file_name).write_text(
+        chrome(page, sections, feature_lookup=feature_lookup),
+        encoding="utf-8",
+    )
 
 
 def page_sections(notebook_path):
@@ -818,7 +1607,7 @@ def page_sections(notebook_path):
 
 
 def write_notebook_pages():
-    groups = [DATA_NOTEBOOKS]
+    groups = [DATA_NOTEBOOKS, EXTRA_MENU_NOTEBOOKS]
     for _sprint_name, notebooks in SPRINTS:
         groups.append(notebooks)
     for notebooks in groups:
@@ -835,7 +1624,7 @@ def write_index():
     body = (
         '<section class="panel" id="vvedenie">'
         "<h2>Введение</h2>"
-        '<div class="prose">{intro}</div>'
+        '<div class="prose prose-intro">{intro}</div>'
         "</section>"
         '<section class="panel" id="poryadok">'
         "<h2>Порядок просмотра</h2>"
@@ -844,9 +1633,10 @@ def write_index():
         '<section class="panel" id="komanda">'
         "<h2>Команда</h2>"
         + TEAM
+        + CAT_MARK_TABLE
         + "</section>"
-    ).format(intro=INTRO, guide=GUIDE)
-    write_simple_page("index.html", body, INDEX_SECTIONS)
+    ).format(intro=INTRO, guide=guide_html())
+    write_simple_page("index.html", body, INDEX_SECTIONS, feature_lookup=False)
 
 
 def write_features():
