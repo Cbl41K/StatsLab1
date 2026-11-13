@@ -7796,7 +7796,7 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=aa72eeb1">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=631c92a6">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9085,6 +9085,10 @@ document.addEventListener("DOMContentLoaded", function () {
             var link = document.createElement("a");
             link.href = section.href;
             link.textContent = section.title;
+            if (section.level && section.level > 2) {
+                link.style.paddingLeft = (section.level - 2) * 0.65 + "rem";
+                link.style.fontSize = section.level >= 4 ? "0.92em" : "";
+            }
             scroll.appendChild(link);
         });
 

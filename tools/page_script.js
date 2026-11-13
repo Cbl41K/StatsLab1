@@ -197,6 +197,10 @@ document.addEventListener("DOMContentLoaded", function () {
             var link = document.createElement("a");
             link.href = section.href;
             link.textContent = section.title;
+            if (section.level && section.level > 2) {
+                link.style.paddingLeft = (section.level - 2) * 0.65 + "rem";
+                link.style.fontSize = section.level >= 4 ? "0.92em" : "";
+            }
             scroll.appendChild(link);
         });
 

@@ -60,23 +60,25 @@ def notebook_toc(notebook_path):
 
         for line in cell.source.splitlines():
             stripped = line.strip()
+            if not stripped:
+                continue
 
             if stripped.startswith("<a id=") and stripped.endswith("</a>"):
                 pending_id = stripped.split('"')[1]
                 continue
-            
+
             if not stripped.startswith("#"):
                 pending_id = None
                 continue
-            
+
             marks = len(stripped) - len(stripped.lstrip("#"))
             title = stripped[marks:].strip()
             anchor = pending_id
             pending_id = None
-            
-            if marks < 2 or marks > 3 or title == "Содержание" or not anchor:
+
+            if marks < 2 or marks > 4 or title == "Содержание" or not anchor:
                 continue
-            
+
             items.append((marks, title, anchor))
     
     return items
@@ -214,8 +216,8 @@ $body
 def page_sections(notebook_path):
     sections = []
     
-    for _level, title, anchor in notebook_toc(notebook_path):
-        sections.append({"title": title, "href": "#" + anchor})
+    for level, title, anchor in notebook_toc(notebook_path):
+        sections.append({"title": title, "href": "#" + anchor, "level": level})
     
     return sections
 
