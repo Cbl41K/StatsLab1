@@ -223,13 +223,14 @@ def plot_normal_mixture_comparison(data, summary, h_values=(0.6, 0.8, 1.0), ax=N
     return ax
 
 
-def probabilities_opt(data, initial_cons, number_of_iterations):
-    """Run EM for a three-normal mixture and return per-observation history.
-
-    The result has one row per observation and iteration. Iteration 0 stores
-    the supplied initial parameters; each later iteration stores the updated
-    parameters and the corresponding posterior component probabilities.
-    """
+def _run_probabilities_opt(
+    data,
+    initial_cons,
+    max_iterations,
+    tolerance=None,
+    consecutive_iterations=5,
+):
+    """Run fixed-step or convergence-based EM and return per-observation history."""
     values = np.asarray(data, dtype=np.float64)
     if values.ndim != 1:
         raise ValueError("data must be one-dimensional")
@@ -239,11 +240,19 @@ def probabilities_opt(data, initial_cons, number_of_iterations):
     if values.size == 0:
         raise ValueError("data contains no finite values")
     if (
-        isinstance(number_of_iterations, (bool, np.bool_))
-        or not isinstance(number_of_iterations, (int, np.integer))
-        or number_of_iterations < 0
+        isinstance(max_iterations, (bool, np.bool_))
+        or not isinstance(max_iterations, (int, np.integer))
+        or max_iterations < 0
     ):
-        raise ValueError("number_of_iterations must be a non-negative integer")
+        raise ValueError("max_iterations must be a non-negative integer")
+    if tolerance is not None and (not np.isfinite(tolerance) or tolerance <= 0):
+        raise ValueError("tolerance must be finite and positive")
+    if (
+        isinstance(consecutive_iterations, (bool, np.bool_))
+        or not isinstance(consecutive_iterations, (int, np.integer))
+        or consecutive_iterations < 1
+    ):
+        raise ValueError("consecutive_iterations must be a positive integer")
 
     if isinstance(initial_cons, pd.DataFrame):
         if len(initial_cons) != 1:
@@ -277,19 +286,35 @@ def probabilities_opt(data, initial_cons, number_of_iterations):
         )
     weights = counts / counts.sum()
 
-    def calculate_probabilities():
+    history = []
+    previous_log_likelihood = None
+    stable_iterations = 0
+    converged = False
+    for iteration in range(max_iterations + 1):
         log_density = -0.5 * (
             np.log(2.0 * np.pi * variances)[None, :]
             + (values[:, None] - means[None, :]) ** 2 / variances[None, :]
         )
         log_joint = log_density + np.log(weights)[None, :]
-        log_joint -= log_joint.max(axis=1, keepdims=True)
-        joint = np.exp(log_joint)
-        return joint / joint.sum(axis=1, keepdims=True)
+        max_log_joint = log_joint.max(axis=1, keepdims=True)
+        scaled_joint = np.exp(log_joint - max_log_joint)
+        normalizers = scaled_joint.sum(axis=1, keepdims=True)
+        probabilities = scaled_joint / normalizers
+        log_likelihood = float(
+            np.sum(max_log_joint[:, 0] + np.log(normalizers[:, 0]))
+        )
 
-    history = []
-    for iteration in range(number_of_iterations + 1):
-        probabilities = calculate_probabilities()
+        relative_change = np.nan
+        if previous_log_likelihood is not None:
+            relative_change = abs(log_likelihood - previous_log_likelihood) / (
+                1.0 + abs(previous_log_likelihood)
+            )
+            if tolerance is not None:
+                stable_iterations = (
+                    stable_iterations + 1 if relative_change < tolerance else 0
+                )
+                converged = stable_iterations >= consecutive_iterations
+
         step = pd.DataFrame(
             {
                 "iteration": iteration,
@@ -302,9 +327,13 @@ def probabilities_opt(data, initial_cons, number_of_iterations):
             step[f"weight_{component + 1}"] = weights[component]
             step[f"expected_value_{component + 1}"] = means[component]
             step[f"variance_{component + 1}"] = variances[component]
+        if tolerance is not None:
+            step["log_likelihood"] = log_likelihood
+            step["relative_change"] = relative_change
+            step["converged"] = converged
         history.append(step)
 
-        if iteration == number_of_iterations:
+        if iteration == max_iterations or converged:
             break
 
         effective_counts = probabilities.sum(axis=0)
@@ -317,6 +346,59 @@ def probabilities_opt(data, initial_cons, number_of_iterations):
         ).sum(axis=0) / effective_counts
         if not np.all(np.isfinite(variances)) or np.any(variances <= 0):
             raise ValueError("optimization produced a non-positive variance")
+        previous_log_likelihood = log_likelihood
 
     return pd.concat(history, ignore_index=True)
+
+
+def probabilities_opt(data, initial_cons, number_of_iterations):
+    """Run a fixed number of EM updates and return per-observation history."""
+    return _run_probabilities_opt(data, initial_cons, number_of_iterations)
+
+
+def probabilities_opt_until_convergence(
+    data,
+    initial_cons,
+    tolerance=1e-6,
+    consecutive_iterations=5,
+    max_iterations=1000,
+):
+    """Run EM until relative log-likelihood change is small for several steps."""
+    return _run_probabilities_opt(
+        data,
+        initial_cons,
+        max_iterations,
+        tolerance=tolerance,
+        consecutive_iterations=consecutive_iterations,
+    )
+
+
+def integrated_squared_error(x, reference_density, model_density):
+    """Numerically integrate the squared difference between two density curves."""
+    x = np.asarray(x, dtype=np.float64)
+    reference_density = np.asarray(reference_density, dtype=np.float64)
+    model_density = np.asarray(model_density, dtype=np.float64)
+    if (
+        x.ndim != 1
+        or reference_density.ndim != 1
+        or model_density.ndim != 1
+        or x.size < 2
+        or reference_density.size != x.size
+        or model_density.size != x.size
+    ):
+        raise ValueError("x and both densities must be one-dimensional and equal-sized")
+    if (
+        not np.all(np.isfinite(x))
+        or not np.all(np.isfinite(reference_density))
+        or not np.all(np.isfinite(model_density))
+    ):
+        raise ValueError("x and both densities must contain only finite values")
+    intervals = np.diff(x)
+    if np.any(intervals <= 0):
+        raise ValueError("x must be strictly increasing")
+
+    squared_error = (reference_density - model_density) ** 2
+    return float(
+        np.sum(0.5 * (squared_error[:-1] + squared_error[1:]) * intervals)
+    )
 
