@@ -222,3 +222,101 @@ def plot_normal_mixture_comparison(data, summary, h_values=(0.6, 0.8, 1.0), ax=N
     ax.grid(alpha=0.2)
     return ax
 
+
+def probabilities_opt(data, initial_cons, number_of_iterations):
+    """Run EM for a three-normal mixture and return per-observation history.
+
+    The result has one row per observation and iteration. Iteration 0 stores
+    the supplied initial parameters; each later iteration stores the updated
+    parameters and the corresponding posterior component probabilities.
+    """
+    values = np.asarray(data, dtype=np.float64)
+    if values.ndim != 1:
+        raise ValueError("data must be one-dimensional")
+    finite_mask = np.isfinite(values)
+    observation_indices = np.flatnonzero(finite_mask)
+    values = values[finite_mask]
+    if values.size == 0:
+        raise ValueError("data contains no finite values")
+    if (
+        isinstance(number_of_iterations, (bool, np.bool_))
+        or not isinstance(number_of_iterations, (int, np.integer))
+        or number_of_iterations < 0
+    ):
+        raise ValueError("number_of_iterations must be a non-negative integer")
+
+    if isinstance(initial_cons, pd.DataFrame):
+        if len(initial_cons) != 1:
+            raise ValueError("initial_cons DataFrame must contain exactly one row")
+        initial_cons = initial_cons.iloc[0]
+    if not isinstance(initial_cons, (pd.Series, dict)):
+        raise TypeError("initial_cons must be a one-row DataFrame, Series, or dict")
+
+    means = np.asarray(
+        [initial_cons[f"expected_value_{i}"] for i in range(1, 4)],
+        dtype=np.float64,
+    )
+    variances = np.asarray(
+        [initial_cons[f"variance_{i}"] for i in range(1, 4)],
+        dtype=np.float64,
+    )
+    counts = np.asarray(
+        [initial_cons[f"number_{i}"] for i in range(1, 4)],
+        dtype=np.float64,
+    )
+    if (
+        not np.all(np.isfinite(means))
+        or not np.all(np.isfinite(variances))
+        or not np.all(np.isfinite(counts))
+        or np.any(variances <= 0)
+        or np.any(counts <= 0)
+    ):
+        raise ValueError(
+            "initial means must be finite; variances and counts must be finite "
+            "and positive"
+        )
+    weights = counts / counts.sum()
+
+    def calculate_probabilities():
+        log_density = -0.5 * (
+            np.log(2.0 * np.pi * variances)[None, :]
+            + (values[:, None] - means[None, :]) ** 2 / variances[None, :]
+        )
+        log_joint = log_density + np.log(weights)[None, :]
+        log_joint -= log_joint.max(axis=1, keepdims=True)
+        joint = np.exp(log_joint)
+        return joint / joint.sum(axis=1, keepdims=True)
+
+    history = []
+    for iteration in range(number_of_iterations + 1):
+        probabilities = calculate_probabilities()
+        step = pd.DataFrame(
+            {
+                "iteration": iteration,
+                "observation": observation_indices,
+                "value": values,
+            }
+        )
+        for component in range(3):
+            step[f"probability_{component + 1}"] = probabilities[:, component]
+            step[f"weight_{component + 1}"] = weights[component]
+            step[f"expected_value_{component + 1}"] = means[component]
+            step[f"variance_{component + 1}"] = variances[component]
+        history.append(step)
+
+        if iteration == number_of_iterations:
+            break
+
+        effective_counts = probabilities.sum(axis=0)
+        if np.any(effective_counts <= np.finfo(np.float64).tiny):
+            raise ValueError("a component received no posterior probability")
+        weights = effective_counts / values.size
+        means = (probabilities * values[:, None]).sum(axis=0) / effective_counts
+        variances = (
+            probabilities * (values[:, None] - means[None, :]) ** 2
+        ).sum(axis=0) / effective_counts
+        if not np.all(np.isfinite(variances)) or np.any(variances <= 0):
+            raise ValueError("optimization produced a non-positive variance")
+
+    return pd.concat(history, ignore_index=True)
+
