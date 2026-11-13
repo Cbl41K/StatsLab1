@@ -75,6 +75,10 @@
 <p>Справка. Хз - мб ссылка на датасет или чет типо того.</p>
 </div></li>
 </ol>
+
+<div class="route-feature-hint">
+<p><strong>Примечание.</strong> На странице «Обзор данных» и в ноутбуках спринтов справа под оглавлением есть поиск признака: введите имя столбца из таблицы (например, <code>cal_logs</code>) — ниже появится его описание, без перехода на «Описание признаков», для удобства чтения - без многочисленных переходов между страницами.</p>
+</div>
 </section><section class="panel" id="komanda"><h2>Команда</h2>
 <table class="team">
 <thead><tr><th>Инфохимики</th><th>Дизайнер</th></tr></thead>
@@ -86,7 +90,7 @@
 <p class="role">Руководил командой: составил план выполнения работы, подобрал начальные данные, с которыми шла дальнейшая работа, и отдал остальным сокомандникам индивидуальные задания. Исследует свойства молекул и разрабатывает свою часть статистического анализа: смотрит, как устроены величины, как они связаны, и проверяет гипотезы.</p>
 </td>
 <td rowspan="4">
-<p class="who">Закликовский Иван<span class="isu">503803</span><span class="roles">дизайнер | возможно разработчик | исследователь</span></p>
+<p class="who">Закликовский Иван<span class="isu">503803</span><span class="roles">дизайнер | разработчик | исследователь</span></p>
 <p class="files">Растворимость и молекулярная масса</p>
 <p class="role">Собрал и оформил этот сайт, оформил ноутбуки команды и переформулировал тексты. Исследует свойства молекул и разрабатывает свою часть статистического анализа: смотрит, как устроены величины, как они связаны, и проверяет гипотезы.</p>
 </td>
@@ -642,6 +646,22 @@ body { margin: 0; font-family: sans-serif; color: var(--text); background: var(-
 .route h3 { margin: 0.15rem 0 0.35rem; font-size: 1.05rem; }
 .route p { margin: 0; line-height: 1.55; }
 .route p.route-sub { margin-top: 0.55rem; color: var(--muted); font-size: 0.98rem; }
+.route-feature-hint {
+    margin-top: 1.25rem;
+    padding: 0.9rem 1.05rem;
+    background: var(--accent-bg);
+    border: 1px solid var(--scheme-line);
+    border-radius: 8px;
+    font-size: 0.96rem;
+    line-height: 1.55;
+}
+.route-feature-hint p { margin: 0; }
+.route-feature-hint code {
+    font-size: 0.9em;
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    background: var(--surface-2);
+}
 .code { font-family: monospace; font-size: 0.92em; }
 .content { margin-left: 22rem; margin-right: 22rem; min-width: 0; padding: 1.5rem 1rem 3rem 1rem; }
 .panel { width: 100%; padding: 1.3rem 1.5rem; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; box-sizing: border-box; }
@@ -659,6 +679,175 @@ h1, h2, h3, h4, h5, h6,
 .jp-RenderedHTMLCommon h4,
 .jp-RenderedHTMLCommon h5,
 .jp-RenderedHTMLCommon h6 { color: var(--heading); }
+body.jp-Notebook .jp-RenderedHTMLCommon h1 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+body.jp-Notebook .jp-RenderedHTMLCommon h2,
+body.jp-Notebook .jp-RenderedHTMLCommon h3,
+body.jp-Notebook .jp-RenderedHTMLCommon h4 {
+    padding-bottom: 0.55rem;
+    margin-top: 1.35rem;
+    margin-bottom: 0.85rem;
+    border-bottom: 1px solid var(--line-soft);
+}
+body.jp-Notebook .jp-RenderedHTMLCommon h2:first-child,
+body.jp-Notebook .jp-RenderedHTMLCommon h3:first-child,
+body.jp-Notebook .jp-RenderedHTMLCommon h4:first-child {
+    margin-top: 0;
+}
+body.jp-Notebook .research-outline {
+    margin-top: 0.35rem;
+}
+body.jp-Notebook .research-outline p:has(> strong:only-child) {
+    margin: 1.35rem 0 0.45rem;
+    padding-top: 0.95rem;
+    border-top: 1px solid var(--line-soft);
+}
+body.jp-Notebook .research-outline > p:first-child:has(> strong:only-child) {
+    margin-top: 0.65rem;
+    padding-top: 0;
+    border-top: none;
+}
+body.jp-Notebook .research-outline p:has(> strong:only-child) > strong {
+    font-weight: 700;
+    font-size: 1.03rem;
+    line-height: 1.45;
+    color: var(--text);
+}
+html[data-theme="dark"] body.jp-Notebook .research-outline p:has(> strong:only-child) > strong,
+html[data-theme="dark"] body.jp-Notebook .research-outline li > p > strong {
+    color: #f3f4f2;
+}
+body.jp-Notebook .research-outline li {
+    margin: 0.85rem 0;
+    padding-left: 0.15rem;
+}
+body.jp-Notebook .research-outline li > p {
+    margin: 0;
+    line-height: 1.62;
+}
+body.jp-Notebook .research-outline li > p > strong {
+    font-weight: 700;
+    color: var(--text);
+}
+body.jp-Notebook .research-outline h3 {
+    margin-top: 2rem;
+    padding-bottom: 0.55rem;
+    margin-bottom: 0.65rem;
+    border-bottom: 1px solid var(--line-soft);
+}
+body.jp-Notebook .research-outline h3:first-of-type {
+    margin-top: 1.5rem;
+}
+body.jp-Notebook .research-outline h3 + p:has(> strong:only-child) {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0.55rem;
+}
+body.jp-Notebook .meme-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    margin: 0.9rem 0 1.15rem;
+    align-items: flex-start;
+    justify-content: center;
+}
+body.jp-Notebook .meme-row img {
+    flex: 0 1 auto;
+    max-width: calc((50% - 0.45rem) / 1.5);
+    max-height: 11.5rem;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 6px;
+    border: 1px solid var(--line-soft);
+}
+body.jp-Notebook .notebook-takeaway {
+    margin: 1.05rem 0 1.35rem;
+    padding: 0.9rem 1.05rem 1rem;
+    background: var(--accent-bg);
+    border: 1px solid var(--line-soft);
+    border-radius: 8px;
+    line-height: 1.62;
+}
+body.jp-Notebook .notebook-takeaway > :first-child {
+    margin-top: 0;
+}
+body.jp-Notebook .notebook-takeaway > :last-child {
+    margin-bottom: 0;
+}
+body.jp-Notebook .notebook-takeaway p > strong:first-child {
+    font-weight: 700;
+    color: var(--text);
+}
+body.jp-Notebook .notebook-takeaway p:has(> strong:only-child) {
+    margin: 1.1rem 0 0.4rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--line-soft);
+}
+body.jp-Notebook .notebook-takeaway > p:first-child:has(> strong:only-child),
+body.jp-Notebook .notebook-takeaway > p:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+body.jp-Notebook .notebook-takeaway ul {
+    margin: 0.5rem 0 0.25rem;
+    padding-left: 1.25rem;
+}
+body.jp-Notebook .notebook-takeaway ul li > p > strong {
+    font-weight: 700;
+    color: var(--text);
+}
+html[data-theme="dark"] body.jp-Notebook .notebook-takeaway p > strong,
+html[data-theme="dark"] body.jp-Notebook .notebook-takeaway li > p > strong,
+html[data-theme="dark"] body.jp-Notebook .notebook-takeaway p:has(> strong:only-child) > strong {
+    color: #f3f4f2;
+}
+body.jp-Notebook .research-outline ol {
+    margin: 0.35rem 0 0;
+    padding-left: 1.35rem;
+    list-style-position: outside;
+}
+body.jp-Notebook .resume-outline {
+    margin-top: 0.25rem;
+}
+body.jp-Notebook .resume-outline ol {
+    margin: 0;
+    padding-left: 1.35rem;
+    list-style-position: outside;
+}
+body.jp-Notebook .resume-outline ol > li {
+    margin: 0;
+    padding: 0.75rem 0 0.75rem 0.15rem;
+    border: none;
+}
+body.jp-Notebook .resume-outline ol > li + li {
+    border-top: 1px solid var(--line-soft);
+}
+body.jp-Notebook .resume-outline ol > li:first-child {
+    padding-top: 0.35rem;
+}
+body.jp-Notebook .resume-outline ol > li:last-child {
+    padding-bottom: 0;
+}
+body.jp-Notebook .resume-outline ol > li > p {
+    font-size: 1.03rem;
+    line-height: 1.62;
+    margin: 0;
+}
+body.jp-Notebook .resume-outline ol > li > p > strong {
+    font-weight: 700;
+    font-size: 1.03rem;
+    color: var(--text);
+}
+html[data-theme="dark"] body.jp-Notebook .resume-outline ol > li > p > strong {
+    color: #f3f4f2;
+}
 .route > li::before { color: var(--heading); border-color: var(--heading); }
 .team th,
 .team .roles { color: var(--heading); }
@@ -865,6 +1054,34 @@ body.jp-Notebook .jp-MarkdownCell .table-sheet {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+}
+body.jp-Notebook .jp-OutputArea-output.jp-RenderedText {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin: 0.7rem 0 0.95rem;
+    padding: 0.78rem 0.95rem;
+    background: var(--surface-2);
+    border: 1px solid var(--line-soft);
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+body.jp-Notebook .jp-OutputArea-output.jp-RenderedText pre {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 0.92rem;
+    line-height: 1.52;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+body.jp-Notebook .jp-OutputArea-output.jp-RenderedText[data-mime-type="application/vnd.jupyter.stderr"] {
+    border-color: var(--line);
+    background: var(--accent-bg);
 }
 .theme-toggle {
     position: fixed;
