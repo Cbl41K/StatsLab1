@@ -402,3 +402,122 @@ def integrated_squared_error(x, reference_density, model_density):
         np.sum(0.5 * (squared_error[:-1] + squared_error[1:]) * intervals)
     )
 
+
+def optimized_mixture_distribution(data, modes, h=0.8):
+    """Fit three normal components to a KDE and return their 9 parameters.
+
+    The returned list is ordered as
+    ``[weight_1, mean_1, variance_1, ..., weight_3, mean_3, variance_3]``.
+    The fit minimizes integrated squared error while requiring each supplied
+    mode to be a stationary local maximum of the mixture.
+    """
+    from scipy.optimize import minimize
+
+    values = np.asarray(data, dtype=np.float64)
+    modes = np.asarray(modes, dtype=np.float64)
+    if values.ndim != 1:
+        raise ValueError("data must be one-dimensional")
+    values = values[np.isfinite(values)]
+    if values.size < 2:
+        raise ValueError("data must contain at least two finite values")
+    if modes.shape != (3,) or not np.all(np.isfinite(modes)):
+        raise ValueError("modes must contain exactly three finite values")
+    if np.any(np.diff(modes) <= 0):
+        raise ValueError("modes must be strictly increasing")
+    if not np.isfinite(h) or h <= 0:
+        raise ValueError("h must be finite and positive")
+
+    x_min = values.min() - 4 * h
+    x_max = values.max() + 4 * h
+    x_grid = np.linspace(x_min, x_max, 1200)
+    reference_density = kde(values, x_grid, h=h)
+
+    nearest_modes = np.argmin(np.abs(values[:, None] - modes[None, :]), axis=1)
+    counts = np.bincount(nearest_modes, minlength=3).astype(np.float64)
+    counts = np.maximum(counts, 1.0)
+    initial_weights = counts / counts.sum()
+    initial_means = modes.copy()
+    initial_variances = np.full(3, h**2, dtype=np.float64)
+    initial_parameters = np.column_stack(
+        (initial_weights, initial_means, initial_variances)
+    ).ravel()
+
+    variance_floor = max((x_grid[1] - x_grid[0]) ** 2 / 16, h**2 * 1e-6)
+    variance_ceiling = max((x_max - x_min) ** 2, h**2)
+    bounds = [
+        bound
+        for _ in range(3)
+        for bound in (
+            (1e-8, 1.0),
+            (x_min, x_max),
+            (variance_floor, variance_ceiling),
+        )
+    ]
+
+    def mixture_values(x, parameters):
+        components = np.asarray(parameters).reshape(3, 3)
+        weights = components[:, 0]
+        means = components[:, 1]
+        variances = components[:, 2]
+        offsets = np.asarray(x, dtype=np.float64)[:, None] - means[None, :]
+        component_densities = np.exp(
+            -0.5 * offsets**2 / variances[None, :]
+        ) / np.sqrt(2 * np.pi * variances[None, :])
+        density = component_densities @ weights
+        derivative = (
+            component_densities
+            * (-offsets / variances[None, :])
+        ) @ weights
+        second_derivative = (
+            component_densities
+            * (
+                offsets**2 / variances[None, :] ** 2
+                - 1 / variances[None, :]
+            )
+        ) @ weights
+        return density, derivative, second_derivative
+
+    derivative_scale = max(reference_density.max() / h, np.finfo(float).tiny)
+    curvature_scale = max(reference_density.max() / h**2, np.finfo(float).tiny)
+
+    def objective(parameters):
+        model_density, _, _ = mixture_values(x_grid, parameters)
+        return integrated_squared_error(x_grid, reference_density, model_density)
+
+    result = minimize(
+        objective,
+        initial_parameters,
+        method="SLSQP",
+        bounds=bounds,
+        constraints=(
+            {
+                "type": "eq",
+                "fun": lambda parameters: np.append(
+                    np.asarray(parameters).reshape(3, 3)[:, 0].sum() - 1,
+                    mixture_values(modes, parameters)[1] / derivative_scale,
+                ),
+            },
+            {
+                "type": "ineq",
+                "fun": lambda parameters: (
+                    -mixture_values(modes, parameters)[2] / curvature_scale
+                ),
+            },
+        ),
+        options={"maxiter": 2000, "ftol": 1e-12},
+    )
+    if not result.success:
+        raise RuntimeError(f"normal-mixture optimization failed: {result.message}")
+
+    fitted = result.x.reshape(3, 3)
+    _, derivatives, second_derivatives = mixture_values(modes, result.x)
+    if (
+        not np.all(np.isfinite(result.x))
+        or not np.isclose(fitted[:, 0].sum(), 1.0, atol=1e-6)
+        or np.any(np.abs(derivatives) > derivative_scale * 1e-5)
+        or np.any(second_derivatives >= 0)
+    ):
+        raise RuntimeError("normal-mixture optimization did not satisfy its constraints")
+
+    return result.x.astype(float).tolist()
+
