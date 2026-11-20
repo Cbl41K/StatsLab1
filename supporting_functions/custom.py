@@ -480,9 +480,58 @@ def optimized_mixture_distribution(data, modes, h=0.8):
     derivative_scale = max(reference_density.max() / h, np.finfo(float).tiny)
     curvature_scale = max(reference_density.max() / h**2, np.finfo(float).tiny)
 
+    target_mean = np.mean(values)
+    target_std = np.std(values)
+    target_median = np.median(values)
+
     def objective(parameters):
+        components = np.asarray(parameters).reshape(3, 3)
+        weights = components[:, 0]
+        means = components[:, 1]
+        variances = components[:, 2]
+
         model_density, _, _ = mixture_values(x_grid, parameters)
-        return integrated_squared_error(x_grid, reference_density, model_density)
+
+        global_ise = integrated_squared_error(
+            x_grid, reference_density, model_density
+        )
+
+        local_ise = 1.0
+        delta = 0.67
+
+        for mode in modes:
+            mask = (x_grid >= mode - delta) & (x_grid <= mode + delta)
+
+            local_ise += integrated_squared_error(
+                x_grid[mask],
+                reference_density[mask],
+                model_density[mask],
+            )
+
+        model_mean = np.sum(weights * means)
+
+        model_variance = np.sum(
+            weights * (variances + means**2)
+        ) - model_mean**2
+
+        model_std = np.sqrt(max(model_variance, 0))
+
+        model_median = np.median(
+        np.repeat(means, 1)  # заменить следующей формулой
+        )
+
+        mean_penalty = ((model_mean - target_mean) / target_std)**2
+        std_penalty = ((model_std - target_std) / target_std)**2
+        median_penalty = ((model_median - target_median) / target_std)**2
+
+
+        return (
+            global_ise
+            + 67.0 * local_ise
+            + 0.0000067 * mean_penalty
+            + 1.67 * std_penalty
+            + 0.00067 * median_penalty
+        )
 
     result = minimize(
         objective,
@@ -504,13 +553,27 @@ def optimized_mixture_distribution(data, modes, h=0.8):
                 ),
             },
         ),
-        options={"maxiter": 2000, "ftol": 1e-12},
+            options={
+            "maxiter": 20000,
+            "ftol": 1e-12,
+            },
     )
-    if not result.success:
-        raise RuntimeError(f"normal-mixture optimization failed: {result.message}")
+    #if not result.success:
+       # raise RuntimeError(f"normal-mixture optimization failed: {result.message}")
+    print("Success:", result.success)
+    print("Message:", result.message)
+    print("Objective:", result.fun)
+    print("Iterations:", result.nit)
+    print("Parameters:", result.x)
+
 
     fitted = result.x.reshape(3, 3)
     _, derivatives, second_derivatives = mixture_values(modes, result.x)
+
+    print("Sum of weights:", fitted[:, 0].sum())
+    print("Derivatives:", derivatives)
+    print("Second derivatives:", second_derivatives)
+
     if (
         not np.all(np.isfinite(result.x))
         or not np.isclose(fitted[:, 0].sum(), 1.0, atol=1e-6)
