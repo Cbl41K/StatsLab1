@@ -143,3 +143,5 @@ def plot_corr_matrix(
     axis.set_title("Numeric parameter correlation matrix")
     figure.tight_layout(rect=[0, 0, 1, 0.98])
     return corr_matrix, figure, axis
+
+
