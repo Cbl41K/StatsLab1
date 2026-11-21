@@ -7801,7 +7801,8 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="Lab02---sprint-2.-%D0%93%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%82%D0%BE%D1%80-%D0%AD%D0%A4%D0%A0">Lab02 - sprint 2. Генератор ЭФР<a class="anchor-link" href="#Lab02---sprint-2.-%D0%93%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%82%D0%BE%D1%80-%D0%AD%D0%A4%D0%A0">¶</a></h1><h2 id="%D0%A1%D0%BE%D0%B4%D0%B5%D1%80%D0%B6%D0%B0%D0%BD%D0%B8%D0%B5">Содержание<a class="anchor-link" href="#%D0%A1%D0%BE%D0%B4%D0%B5%D1%80%D0%B6%D0%B0%D0%BD%D0%B8%D0%B5">¶</a></h2><p><strong><a href="#sec-1">Generator: ECDF для cal_pka_basic</a></strong></p>
+<h1 id="Lab02---sprint-2.-%D0%93%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%82%D0%BE%D1%80-%D0%AD%D0%A4%D0%A0">Lab02 - sprint 2. Генератор ЭФР<a class="anchor-link" href="#Lab02---sprint-2.-%D0%93%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%82%D0%BE%D1%80-%D0%AD%D0%A4%D0%A0">¶</a></h1><p><a id="sec-1-14"></a></p>
+<h2 id="%D0%A1%D0%BE%D0%B4%D0%B5%D1%80%D0%B6%D0%B0%D0%BD%D0%B8%D0%B5">Содержание<a class="anchor-link" href="#%D0%A1%D0%BE%D0%B4%D0%B5%D1%80%D0%B6%D0%B0%D0%BD%D0%B8%D0%B5">¶</a></h2><p><strong><a href="#sec-1">Generator: ECDF для cal_pka_basic</a></strong></p>
 <ul>
 <li><a href="#sec-1-1">1. Часть 1. Непрерывная случайная величина <code>cal_pka_basic</code> (обратная ЭФР с линейной интерполяцией)</a></li>
 <li><a href="#sec-1-2">2. Математическое обоснование метода</a></li>
@@ -9821,12 +9822,13 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.appendChild(bar);
     document.body.appendChild(layout);
 
-    function foldBlock(node, label) {
+    function foldBlock(node, label, openByDefault) {
         var details = document.createElement("details");
         var summary = document.createElement("summary");
 
         details.className = "code-fold";
         summary.textContent = label;
+        if (openByDefault) details.open = true;
         node.parentNode.insertBefore(details, node);
         details.appendChild(summary);
         details.appendChild(node);
@@ -9837,7 +9839,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.querySelectorAll(".jp-RenderedImage").forEach(function (image) {
-        foldBlock(image, "График");
+        foldBlock(image, "График", true);
     });
 
     document.querySelectorAll(".jp-RenderedHTML table.dataframe").forEach(function (table) {

@@ -1224,12 +1224,13 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.appendChild(bar);
     document.body.appendChild(layout);
 
-    function foldBlock(node, label) {
+    function foldBlock(node, label, openByDefault) {
         var details = document.createElement("details");
         var summary = document.createElement("summary");
 
         details.className = "code-fold";
         summary.textContent = label;
+        if (openByDefault) details.open = true;
         node.parentNode.insertBefore(details, node);
         details.appendChild(summary);
         details.appendChild(node);
@@ -1240,7 +1241,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.querySelectorAll(".jp-RenderedImage").forEach(function (image) {
-        foldBlock(image, "График");
+        foldBlock(image, "График", true);
     });
 
     document.querySelectorAll(".jp-RenderedHTML table.dataframe").forEach(function (table) {

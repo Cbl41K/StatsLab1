@@ -5,7 +5,7 @@
 <title>Инфохимия. Статистический анализ свойств молекул</title>
 </head>
 <body>
-<section class="panel"><h2>Источники</h2><p>Список литературы появится здесь, когда его соберут.</p></section>
+<section class="panel"><h2>Источники</h2><p>Ссылки на работы, на которые опираются ноутбуки команды.</p><ol><li>Kinderman, Monahan, <em>Computer Generation of Random Variables Using the Ratio of Uniform Deviates</em> (1977). <a href="https://doi.org/10.1145/355744.355750">DOI статьи</a>.</li></ol></section>
 <style>
 :root {
     color-scheme: light;
@@ -1195,12 +1195,13 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.appendChild(bar);
     document.body.appendChild(layout);
 
-    function foldBlock(node, label) {
+    function foldBlock(node, label, openByDefault) {
         var details = document.createElement("details");
         var summary = document.createElement("summary");
 
         details.className = "code-fold";
         summary.textContent = label;
+        if (openByDefault) details.open = true;
         node.parentNode.insertBefore(details, node);
         details.appendChild(summary);
         details.appendChild(node);
@@ -1211,7 +1212,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.querySelectorAll(".jp-RenderedImage").forEach(function (image) {
-        foldBlock(image, "График");
+        foldBlock(image, "График", true);
     });
 
     document.querySelectorAll(".jp-RenderedHTML table.dataframe").forEach(function (table) {

@@ -272,7 +272,15 @@ def write_materials():
     body = (
         '<section class="panel">'
         "<h2>Источники</h2>"
-        "<p>Список литературы появится здесь, когда его соберут.</p>"
+        "<p>Ссылки на работы, на которые опираются ноутбуки команды.</p>"
+        "<ol>"
+        "<li>"
+        "Kinderman, Monahan, "
+        "<em>Computer Generation of Random Variables Using the Ratio of Uniform Deviates</em> "
+        "(1977). "
+        '<a href="https://doi.org/10.1145/355744.355750">DOI статьи</a>.'
+        "</li>"
+        "</ol>"
         "</section>"
     )
     write_simple_page("materials.html", body, [])
