@@ -9573,6 +9573,8 @@ body { margin: 0; font-family: sans-serif; color: var(--text); background: var(-
 .route > li { display: grid; grid-template-columns: 2.3rem 1fr; gap: 0.75rem; padding: 0.95rem 0; border-top: 1px solid var(--line-soft); }
 .route > li::before { counter-increment: stop; content: counter(stop); width: 2.3rem; height: 2.3rem; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); font-weight: 600; }
 .route h3 { margin: 0.15rem 0 0.35rem; font-size: 1.05rem; }
+.route > li.route-item--title-only { align-items: center; padding: 0.65rem 0; }
+.route > li.route-item--title-only h3 { margin: 0; }
 .route p { margin: 0; line-height: 1.55; }
 .route p.route-sub { margin-top: 0.55rem; color: var(--muted); font-size: 0.98rem; }
 .route-feature-hint {
