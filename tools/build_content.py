@@ -9,11 +9,19 @@ DATA_NOTEBOOKS = [
     ("notebooks/data_review.ipynb", "Обзор данных", "data_review.html"),
 ]
 
+GITHUB = "https://github.com/Cbl41K/StatsLab1/blob/design"
+
 AUTHORS = {
     "features.html": "Сычев Александр | 467653",
     "data_review.html": "Сычев Александр | 467653",
     "hbond_simple.html": "Петрунина Анна | 327017",
     "logs_mw_ktvd.html": "Закликовский Иван | 503803",
+    "pka_basic_analysis.html": "Родичева Варвара | 502343",
+    "cal_refractivity.html": "Авсиевич Евдокия | 464929",
+    "generator_ecdf.html": "Родичева Варвара | 502343",
+    "degenerating.html": "Сычев Александр | 467653",
+    "lognormal_generator.html": "Авсиевич Евдокия | 464929",
+    "generator_empirical.html": "Петрунина Анна | 327017",
     "generator_viz.html": "Закликовский Иван | 503803",
 }
 
@@ -27,9 +35,43 @@ SPRINTS = [
                 "Растворимость и молекулярная масса",
                 "logs_mw_ktvd.html",
             ),
+            (
+                "notebooks/pka_basic_analysis.ipynb",
+                "pKa (основной)",
+                "pka_basic_analysis.html",
+            ),
+            (
+                "notebooks/cal_refractivity.ipynb",
+                "Молекулярная рефрактивность",
+                "cal_refractivity.html",
+            ),
         ],
     ),
-    ("Спринт 2", []),
+    (
+        "Спринт 2",
+        [
+            (
+                "notebooks/generator_ecdf.ipynb",
+                "Генератор ЭФР (pKa)",
+                "generator_ecdf.html",
+            ),
+            (
+                "generators/generator.ipynb",
+                "ЭФР для A и D",
+                "generator_empirical.html",
+            ),
+            (
+                "generators/lognormal_generator_(1).ipynb",
+                "Логнормальный генератор (refractivity)",
+                "lognormal_generator.html",
+            ),
+            (
+                "notebooks/degenerating.ipynb",
+                "Смесь / madness (pKa)",
+                "degenerating.html",
+            ),
+        ],
+    ),
 ]
 
 EXTRA_MENU_NOTEBOOKS = [
@@ -70,11 +112,10 @@ GUIDE_SPRINT_LAYOUT = {
     },
     "Спринт 2": {
         "left": 2,
-        "right": 1,
+        "right": 2,
         "bar": "thick",
         "wide": True,
-        "stubs": True,
-        "stubs_only": True,
+        "stubs": False,
         "leaf_notes": False,
     },
 }
@@ -85,6 +126,12 @@ GUIDE_NOTEBOOK_NOTES = {
     "materials.html": "статьи и описания, на которые опирается работа",
     "hbond_simple.html": "акцепторы и доноры водородной связи вместе",
     "logs_mw_ktvd.html": "растворимость и молекулярная масса в одном ноутбуке",
+    "pka_basic_analysis.html": "основной pKa: стохастика, связи, EDA, гипотезы",
+    "cal_refractivity.html": "молекулярная рефрактивность по плану спринта 1",
+    "generator_ecdf.html": "генератор по обратной ЭФР для cal_pka_basic",
+    "generator_empirical.html": "ЭФР-генератор для акцепторов и доноров (ветка Any)",
+    "degenerating.html": "смесь распределений для многомодального pKa (madness)",
+    "lognormal_generator.html": "логнорм. генератор для cal_refractivity",
     "generator_viz.html": "как устроен и визуализируется генератор",
 }
 
@@ -387,39 +434,45 @@ TEAM = """
 <tr>
 <td>
 <p class="who">Сычев Александр<span class="isu">467653</span><span class="roles">тимлид | разработчик | исследователь</span></p>
-<p class="files">Обзор данных, Описание признаков</p>
+<p class="files"><a href="{gh}/notebooks/data_review.ipynb">Обзор данных</a>,
+<a href="{gh}/content/opisanie-priznakov.html">Описание признаков</a><br>
+<a href="{gh}/notebooks/degenerating.ipynb">Смесь / madness</a></p>
 <p class="role">Руководил командой: составил план выполнения работы, подобрал начальные данные, с которыми шла дальнейшая работа, и отдал остальным сокомандникам индивидуальные задания. {chemist}</p>
 </td>
 <td rowspan="4">
 <p class="who">Закликовский Иван<span class="isu">503803</span><span class="roles">дизайнер | разработчик | исследователь</span></p>
-<p class="files">Растворимость и молекулярная масса</p>
+<p class="files"><a href="{gh}/notebooks/logs_mw_ktvd.ipynb">Растворимость и мол. масса</a>,
+<a href="{gh}/notebooks/generator_viz.ipynb">Визуализация генератора</a></p>
 <p class="role">Собрал и оформил этот сайт, оформил ноутбуки команды и переформулировал тексты. {chemist}</p>
 </td>
 </tr>
 <tr>
 <td>
 <p class="who">Петрунина Анна<span class="isu">327017</span><span class="roles">разработчик | исследователь</span></p>
-<p class="files">Акцепторы и доноры</p>
+<p class="files"><a href="{gh}/notebooks/hbond_simple.ipynb">Акцепторы и доноры</a>,
+<a href="{gh}/generators/generator.ipynb">ЭФР для A и D</a></p>
 <p class="role">{chemist}</p>
 </td>
 </tr>
 <tr>
 <td>
 <p class="who">Родичева Варвара<span class="isu">502343</span><span class="roles">разработчик | исследователь</span></p>
-<p class="files">&lt;пока нет&gt;</p>
+<p class="files"><a href="{gh}/notebooks/pka_basic_analysis.ipynb">pKa (основной)</a>,
+<a href="{gh}/notebooks/generator_ecdf.ipynb">Генератор ЭФР</a></p>
 <p class="role">{chemist}</p>
 </td>
 </tr>
 <tr>
 <td>
 <p class="who">Авсиевич Евдокия<span class="isu">464929</span><span class="roles">разработчик | исследователь</span></p>
-<p class="files">&lt;пока нет&gt;</p>
+<p class="files"><a href="{gh}/notebooks/cal_refractivity.ipynb">Молекулярная рефрактивность</a>,
+<a href="{gh}/generators/lognormal_generator_(1).ipynb">Логнормальный генератор</a></p>
 <p class="role">{chemist}</p>
 </td>
 </tr>
 </tbody>
 </table>
-""".format(chemist=CHEMIST)
+""".format(chemist=CHEMIST, gh=GITHUB)
 
 CAT_MARK_TABLE = """
 <h3 class="cat-mark-title">Таблица</h3>
@@ -430,30 +483,30 @@ CAT_MARK_TABLE = """
 <tbody>
 <tr>
 <td>lab.ic.01 Сычев Александр 467653</td>
-<td><a href="data_review.html">Обзор данных</a><br><a href="features.html">Описание признаков</a></td>
+<td><a href="{gh}/notebooks/data_review.ipynb">Обзор данных</a><br><a href="{gh}/content/opisanie-priznakov.html">Описание признаков</a><br><a href="{gh}/notebooks/degenerating.ipynb">Смесь / madness</a></td>
 <td>—</td><td>?</td>
 </tr>
 <tr>
 <td>lab.ic.01 Петрунина Анна 327017</td>
-<td><a href="hbond_simple.html">Акцепторы и доноры</a></td>
+<td><a href="{gh}/notebooks/hbond_simple.ipynb">Акцепторы и доноры</a><br><a href="{gh}/generators/generator.ipynb">ЭФР для A и D</a></td>
 <td>—</td><td>?</td>
 </tr>
 <tr>
 <td>lab.ic.01 Родичева Варвара 502343</td>
-<td>—</td>
+<td><a href="{gh}/notebooks/pka_basic_analysis.ipynb">pKa (основной)</a><br><a href="{gh}/notebooks/generator_ecdf.ipynb">Генератор ЭФР</a></td>
 <td>—</td><td>?</td>
 </tr>
 <tr>
 <td>lab.ic.01 Авсиевич Евдокия 464929</td>
-<td>—</td>
+<td><a href="{gh}/notebooks/cal_refractivity.ipynb">Молекулярная рефрактивность</a><br><a href="{gh}/generators/lognormal_generator_(1).ipynb">Логнормальный генератор</a></td>
 <td>—</td><td>?</td>
 </tr>
 <tr>
 <td>lab.de.01 Закликовский Иван 503803</td>
-<td><a href="logs_mw_ktvd.html">Растворимость и молекулярная масса</a><br><a href="generator_viz.html">Визуализация генератора</a></td>
+<td><a href="{gh}/notebooks/logs_mw_ktvd.ipynb">Растворимость и мол. масса</a><br><a href="{gh}/notebooks/generator_viz.ipynb">Визуализация генератора</a></td>
 <td>—</td><td>?</td>
 </tr>
 </tbody>
 </table>
-"""
+""".format(gh=GITHUB)
 

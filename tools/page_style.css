@@ -597,6 +597,45 @@ body.jp-Notebook .jp-RenderedHTMLCommon h4:first-child {
     margin-top: 0;
 }
 
+/* Подзаголовок сразу под заголовком — без линии только между соседними заголовками */
+body.jp-Notebook .jp-RenderedHTMLCommon h2:has(+ h3),
+body.jp-Notebook .jp-RenderedHTMLCommon h2:has(+ h4),
+body.jp-Notebook .jp-RenderedHTMLCommon h2:has(+ p:empty + h3),
+body.jp-Notebook .jp-RenderedHTMLCommon h2:has(+ p:empty + h4),
+body.jp-Notebook .jp-RenderedHTMLCommon h3:has(+ h3),
+body.jp-Notebook .jp-RenderedHTMLCommon h3:has(+ h4),
+body.jp-Notebook .jp-RenderedHTMLCommon h3:has(+ p:empty + h3),
+body.jp-Notebook .jp-RenderedHTMLCommon h3:has(+ p:empty + h4) {
+    border-bottom: none;
+    margin-bottom: 0.35rem;
+    padding-bottom: 0.1rem;
+}
+
+body.jp-Notebook .jp-RenderedHTMLCommon h2 + h3,
+body.jp-Notebook .jp-RenderedHTMLCommon h2 + h4,
+body.jp-Notebook .jp-RenderedHTMLCommon h2 + p:empty + h3,
+body.jp-Notebook .jp-RenderedHTMLCommon h2 + p:empty + h4,
+body.jp-Notebook .jp-RenderedHTMLCommon h3 + h3,
+body.jp-Notebook .jp-RenderedHTMLCommon h3 + h4,
+body.jp-Notebook .jp-RenderedHTMLCommon h3 + p:empty + h3,
+body.jp-Notebook .jp-RenderedHTMLCommon h3 + p:empty + h4 {
+    margin-top: 0.3rem;
+}
+
+/* Заголовок в конце ячейки и подзаголовок в следующей markdown-ячейке */
+body.jp-Notebook .jp-MarkdownCell:has(.jp-RenderedHTMLCommon > h2:last-child):has(+ .jp-MarkdownCell .jp-RenderedHTMLCommon > h3:first-child) .jp-RenderedHTMLCommon > h2:last-child,
+body.jp-Notebook .jp-MarkdownCell:has(.jp-RenderedHTMLCommon > h2:last-child):has(+ .jp-MarkdownCell .jp-RenderedHTMLCommon > h4:first-child) .jp-RenderedHTMLCommon > h2:last-child,
+body.jp-Notebook .jp-MarkdownCell:has(.jp-RenderedHTMLCommon > h3:last-child):has(+ .jp-MarkdownCell .jp-RenderedHTMLCommon > h3:first-child) .jp-RenderedHTMLCommon > h3:last-child,
+body.jp-Notebook .jp-MarkdownCell:has(.jp-RenderedHTMLCommon > h3:last-child):has(+ .jp-MarkdownCell .jp-RenderedHTMLCommon > h4:first-child) .jp-RenderedHTMLCommon > h3:last-child {
+    border-bottom: none;
+    margin-bottom: 0.35rem;
+    padding-bottom: 0.1rem;
+}
+
+body.jp-Notebook .jp-RenderedHTMLCommon hr {
+    display: none;
+}
+
 body.jp-Notebook .research-outline {
     margin-top: 0.35rem;
 }

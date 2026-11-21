@@ -20,6 +20,21 @@ warnings.filterwarnings("ignore")
 sns.set_theme(style="whitegrid", palette="muted")
 RNG = np.random.default_rng(42)
 
+
+def _display_df(df, caption: str | None = None) -> None:
+    """Таблица в HTML-ноутбуке (не plain-text print)."""
+    try:
+        from IPython.display import Markdown, display
+
+        if caption:
+            display(Markdown(caption))
+        display(df)
+    except Exception:
+        if caption:
+            print(caption.replace("**", "").strip(":"))
+        print(df)
+
+
 # Настройка путей
 def get_project_root() -> Path:
     """Определяет корень проекта StatsLab1."""
@@ -100,8 +115,10 @@ def analyze_step2_relationships(df: pd.DataFrame):
             "Связь значима (alpha=0.05)": "Да" if min(p_val, s_val) < 0.05 else "Нет"
         })  
 
-    print("Связь cal_pka_basic с другими признаками:")
-    print(pd.DataFrame(corr_results).set_index("Признак"))
+    _display_df(
+        pd.DataFrame(corr_results).set_index("Признак"),
+        "**Связь cal_pka_basic с другими признаками:**",
+    )
 
     fig, ax = plt.subplots(figsize=(8, 5))
 
@@ -169,8 +186,10 @@ def analyze_step3_consistency(pka: np.ndarray):
         "Разброс среднего (эмпирический SE)": [np.std(means_by_size[s]) for s in sample_sizes],
         "Теоретический SE": [true_std / np.sqrt(s) for s in sample_sizes]
     }).round(3)
-    print("Сравнение эмпирической погрешности среднего с формулой ЗБЧ:")
-    print(table.set_index("Объём выборки n").to_string())
+    _display_df(
+        table.set_index("Объём выборки n"),
+        "**Сравнение эмпирической погрешности среднего с формулой ЗБЧ:**",
+    )
 
 
 def analyze_step4_eda_and_transformation(df: pd.DataFrame, pka: np.ndarray):
@@ -188,8 +207,10 @@ def analyze_step4_eda_and_transformation(df: pd.DataFrame, pka: np.ndarray):
         "Эксцесс (Kurtosis)": round(stats.kurtosis(pka), 2),
         "Молекул с высоким pKa (> 12)": int((pka > 12).sum()),
     })
-    print("Основные числовые показатели cal_pka_basic:")
-    print(summary.to_frame(name="Значение").to_string())
+    _display_df(
+        summary.to_frame(name="Значение"),
+        "**Основные числовые показатели cal_pka_basic:**",
+    )
 
     # метод Йео-Джонсона
     pt = PowerTransformer(method="yeo-johnson")
@@ -217,8 +238,7 @@ def analyze_step4_eda_and_transformation(df: pd.DataFrame, pka: np.ndarray):
 
     # 5 молекул с самым большим pKa
     top5 = df.nlargest(5, "cal_pka_basic")[["name", "cal_pka_basic", "cal_physiological_charge", "cal_molecular_weight"]]
-    print("\nПримеры 5 молекул с наивысшим pKa:")
-    print(top5.to_string(index=False))
+    _display_df(top5, "**Примеры 5 молекул с наивысшим pKa:**")
 
 def analyze_step5_sampling(pka: np.ndarray):
     """Сравнивает точность оценок с возвращением и без возвращения."""
@@ -258,8 +278,10 @@ def analyze_step5_sampling(pka: np.ndarray):
         "SE (без возвращения)": np.round(se_without, 3),
         "Выигрыш точности (SE без / с)": np.round(np.array(se_without) / np.array(se_with), 3)
     })
-    print("Сравнение ошибок при разных способах выборки:")
-    print(table.set_index("Объём выборки n").to_string())
+    _display_df(
+        table.set_index("Объём выборки n"),
+        "**Сравнение ошибок при разных способах выборки:**",
+    )
 
 
 
@@ -328,8 +350,10 @@ def analyze_step6_models(pka: np.ndarray):
     models.append({"Модель": "Кластеризация K-Means (3 колокола)", "Параметров": 8, "AIC": aic_km3, "BIC": bic_km3})
 
     table = pd.DataFrame(models).sort_values("AIC").round(1)
-    print("Сравнение математических моделей распределения (чем меньше AIC/BIC, тем лучше):")
-    print(table.set_index("Модель").to_string())
+    _display_df(
+        table.set_index("Модель"),
+        "**Сравнение математических моделей распределения (чем меньше AIC/BIC, тем лучше):**",
+    )
 
     fig, axes = plt.subplots(1, 2, figsize=(15, 4.5))
 
@@ -382,7 +406,10 @@ def analyze_step7_hypothesis1_state(df: pd.DataFrame):
     LABELS = {0: "0 — state пропущен", 1: "1 — liquid", 2: "2 — solid"}
     COLORS = {0: "#E69F00", 1: "#0072B2", 2: "#009E73"}  # оранжевый, синий, зелёный
 
-    print(pd.Series({LABELS[g]: int((state_code == g).sum()) for g in (0, 1, 2)}, name="молекул").to_frame())
+    _display_df(
+        pd.Series({LABELS[g]: int((state_code == g).sum()) for g in (0, 1, 2)}, name="молекул").to_frame(),
+        "**Число молекул по группам state:**",
+    )
 
     valid_both = keep & df["cal_pka_basic"].notna() & df["cal_pka_acidic"].notna()
     pka_b = df.loc[valid_both, "cal_pka_basic"].to_numpy()
@@ -449,8 +476,7 @@ def analyze_step7_hypothesis1_state(df: pd.DataFrame):
             "корреляция basic и acidic (Спирмен)": stats.spearmanr(pka_b[m_both], pka_a[m_both]).statistic,
         })
     group_table = pd.DataFrame(group_rows).set_index("группа").round(2)
-    print("\nХарактеристики групп:")
-    print(group_table)
+    _display_df(group_table, "**Характеристики групп:**")
 
     # 1) Критерий Краскела–Уоллиса для трёх групп
     kw_rows = []
@@ -466,8 +492,10 @@ def analyze_step7_hypothesis1_state(df: pd.DataFrame):
             "ε² (размер эффекта)": round(max(0, eps2), 4),
             "вывод": "различия есть (p < 0,05)" if p < 0.05 else "различий нет (p ≥ 0,05)",
         })
-    print("\n1) Критерий Краскела–Уоллиса для трех групп:")
-    print(pd.DataFrame(kw_rows).set_index("величина"))
+    _display_df(
+        pd.DataFrame(kw_rows).set_index("величина"),
+        "**1) Критерий Краскела–Уоллиса для трёх групп:**",
+    )
 
     # 2) Таблица сопряженности по диапазонам (аналог Cell 36 в hbond_simple.ipynb)
     b_bins = pd.cut(df["cal_pka_basic"], [-np.inf, 0, 4, 8, 12, np.inf], labels=["<0", "0–4", "4–8", "8–12", "12+"])
@@ -477,8 +505,10 @@ def analyze_step7_hypothesis1_state(df: pd.DataFrame):
     shares = (sub.div(sub.sum(axis=1), axis=0) * 100).round(1)
     shares.columns = [f"% группы {g}" for g in shares.columns]
     shares.insert(0, "молекул", sub.sum(axis=1))
-    print(f"\n2) cal_pka_basic по диапазонам: хи-квадрат = {chi2:.1f}, степеней свободы = {dof}, p = {p_str(p_chi)}, V Крамера = {v:.3f}")
-    print(shares)
+    _display_df(
+        shares,
+        f"**2) cal_pka_basic по диапазонам:** χ² = {chi2:.1f}, df = {dof}, p = {p_str(p_chi)}, V Крамера = {v:.3f}",
+    )
 
     # 3) Попарные сравнения Манна-Уитни с поправкой Холма
     g0 = df.loc[(state_code == 0) & df["cal_pka_basic"].notna(), "cal_pka_basic"].to_numpy()
@@ -509,8 +539,10 @@ def analyze_step7_hypothesis1_state(df: pd.DataFrame):
     pair_df["Различие значимо"] = np.where(pair_df["p с поправкой Холма"] < 0.05, "Да", "Нет")
     pair_df["p-value"] = pair_df["p-value"].apply(lambda p: f"{p:.4f}")
     pair_df["p с поправкой Холма"] = pair_df["p с поправкой Холма"].apply(lambda p: f"{p:.4f}")
-    print("\n3) Попарные сравнения Манна–Уитни для cal_pka_basic с поправкой Холма:")
-    print(pair_df.set_index("Сравнение"))
+    _display_df(
+        pair_df.set_index("Сравнение"),
+        "**3) Попарные сравнения Манна–Уитни для cal_pka_basic с поправкой Холма:**",
+    )
 
 
 def analyze_step7_hypothesis2_interchangeability(df: pd.DataFrame):
@@ -549,8 +581,10 @@ def analyze_step7_hypothesis2_interchangeability(df: pd.DataFrame):
             "95% доверительный интервал": f"[{lo:.3f}; {hi:.3f}]",
             "p-value": p_str(res.pvalue)
         })
-    print("\nКорреляция cal_pka_basic и cal_pka_acidic:")
-    print(pd.DataFrame(rows).set_index("коэффициент"))
+    _display_df(
+        pd.DataFrame(rows).set_index("коэффициент"),
+        "**Корреляция cal_pka_basic и cal_pka_acidic:**",
+    )
 
     def regression_report(x, y, k=5):
         fit = stats.linregress(x, y)
@@ -639,8 +673,7 @@ def analyze_step7_hypothesis2_interchangeability(df: pd.DataFrame):
             "прогноз в пределах ±1": rep["в пределах ±1"],
         }
     swap_table = pd.DataFrame(swap_rows).T.round(2)
-    print("\nОценка взаимозаменяемости:")
-    print(swap_table)
+    _display_df(swap_table, "**Оценка взаимозаменяемости:**")
 
 
 def analyze_step7_hypothesis4_multimodal(pka: np.ndarray):
